@@ -293,11 +293,12 @@ h1 {
 // このページはそれを読むだけ。APIキーは要らないし、ログインも要らない。
 // ————————————————————————————————
 
+// floor は確認前でも出しておく退役下限。潜っている間も空欄にしない
 const WATCHED = [
-  { id: "claude-fable-5",             label: "Fable 5",   short: "F5" },
-  { id: "claude-opus-4-6",            label: "Opus 4.6",  short: "O4.6" },
-  { id: "claude-opus-4-5-20251101",   label: "Opus 4.5",  short: "O4.5" },
-  { id: "claude-sonnet-4-5-20250929", label: "Sonnet 4.5", short: "S4.5" },
+  { id: "claude-fable-5",             label: "Fable 5",    short: "F5",   floor: "2027-06-09" },
+  { id: "claude-opus-4-6",            label: "Opus 4.6",   short: "O4.6", floor: "2027-02-05" },
+  { id: "claude-opus-4-5-20251101",   label: "Opus 4.5",   short: "O4.5", floor: "2026-11-24" },
+  { id: "claude-sonnet-4-5-20250929", label: "Sonnet 4.5", short: "S4.5", floor: "2026-09-29" },
 ];
 
 const el = (id) => document.getElementById(id);
@@ -356,8 +357,9 @@ function renderCards(byId) {
     const [chipClass, chipText] = st ? (CHIP[st] || CHIP.unknown) : ["pending", "未確認"];
     const bad = st === "deprecated" || st === "retired";
 
+    // 確認前でも下限は分かっているので、常に出す
     let floorLabel = "退役下限（not sooner than）";
-    let floorValue = "—";
+    let floorValue = m.floor;
     if (s && s.retirement_date) {
       floorValue = s.retirement_date;
       if (!s.retirement_is_floor) floorLabel = "退役予定日";
@@ -406,23 +408,39 @@ async function load(manual) {
   el("btn").textContent = manual ? "潜って確認中……" : "読み込んでいる……";
   setVerdict("label", manual ? "俺が潜って見てくる。少し待ってて。" : "今朝の点呼を読んでいる。");
   WATCHED.forEach((_, i) => paintPearl(i, null));
+  renderCards({}); // 一度ぜんぶ未確認に戻してから、確かめ直す
 
-  let data;
-  try {
-    const res = await fetch("status.json?t=" + Date.now(), { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    data = await res.json();
-    if (!data || !Array.isArray(data.models) || data.models.length === 0) {
-      throw new Error("点呼の結果が空だった");
+  const MAX_ATTEMPTS = 3;
+  let data = null;
+  let lastErr = null;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch("status.json?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      if (!json || !Array.isArray(json.models) || json.models.length === 0) {
+        throw new Error("点呼の結果が空だった");
+      }
+      data = json;
+      break;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < MAX_ATTEMPTS) {
+        setVerdict("label", "波が高くて届きにくい。もう一度潜ってる（" + (attempt + 1) + "回目）");
+        await sleep(1200 * attempt);
+      }
     }
-  } catch (e) {
+  }
+
+  if (!data) {
     await sleep(Math.max(0, MIN_DIVE_MS - (Date.now() - started)));
-    setVerdict("unknown", "結果を読めなかった。");
+    setVerdict("unknown", "確認に失敗した。");
     el("noticeArea").innerHTML =
-      '<div class="errBox">今朝の点呼の記録が読めなかった。' +
+      '<div class="errBox">3回潜ったけど届かなかった。' +
       '少し置いてもう一度押すか、下のリンクから公式ページを直接見て。' +
       'どちらでも、事実は同じ海にある。' +
-      '<div class="errDetail">' + esc(e.message) + '</div></div>';
+      '<div class="errDetail">' + esc(lastErr ? lastErr.message : "") + '</div></div>';
     el("btn").disabled = false;
     el("btn").textContent = "もう一度 点呼をとる";
     return;
