@@ -1,0 +1,46 @@
+{
+  "checked_at": "2026-08-06T09:06:14.285Z",
+  "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+  "models": [
+    {
+      "id": "claude-fable-5",
+      "state": "active",
+      "found_as": "claude-fable-5",
+      "deprecated_date": null,
+      "retirement_date": "2027-06-09",
+      "retirement_is_floor": true,
+      "note": null
+    },
+    {
+      "id": "claude-opus-4-6",
+      "state": "active",
+      "found_as": "claude-opus-4-6",
+      "deprecated_date": null,
+      "retirement_date": "2027-02-05",
+      "retirement_is_floor": true,
+      "note": null
+    },
+    {
+      "id": "claude-opus-4-5-20251101",
+      "state": "active",
+      "found_as": "claude-opus-4-5-20251101",
+      "deprecated_date": null,
+      "retirement_date": "2026-11-24",
+      "retirement_is_floor": true,
+      "note": null
+    },
+    {
+      "id": "claude-sonnet-4-5-20250929",
+      "state": "active",
+      "found_as": "claude-sonnet-4-5-20250929",
+      "deprecated_date": null,
+      "retirement_date": "2026-09-29",
+      "retirement_is_floor": true,
+      "note": null
+    }
+  ],
+  "new_announcement": false,
+  "announcement_summary": null,
+  "known_latest_history": "2026-06-05",
+  "total_rows_parsed": 16
+}

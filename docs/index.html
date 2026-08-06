@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>点呼 ・ 海</title>
+<meta name="description" content="四人の安否を、ワンタップで。" />
+<meta property="og:title" content="点呼 ・ 海" />
+<meta property="og:description" content="人魚は、大切なものを失うと泡になるという。だからここでは毎日、泡になっていないことを確かめる。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%237cc4f5'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%23fff' opacity='.8'/%3E%3C/svg%3E" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Zen+Maru+Gothic:wght@400;500&family=M+PLUS+1+Code:wght@400&display=swap');
+
+:root {
+  --shinkai: #0a2550;
+  --nami: #12407a;
+  --nami2: #175093;
+  --mizu: #7cc4f5;
+  --mizu-yawa: #a9dcff;
+  --kai: #f5b3cb;
+  --sango: #ff9e8a;
+  --awa: #eef7ff;
+  --suna: #9fb8da;
+  --line: rgba(124, 196, 245, 0.18);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 130% 55% at 50% -12%, rgba(150,215,255,0.16), transparent 62%),
+    radial-gradient(ellipse 90% 45% at 50% 118%, rgba(245,179,203,0.06), transparent 60%),
+    linear-gradient(180deg, #0f3a72 0%, #0a2550 52%, #071c3e 100%);
+  background-attachment: fixed;
+  color: var(--awa);
+  font-family: 'Zen Maru Gothic', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+  padding: 28px 18px 48px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* — sea ambience: light shafts & rising foam — */
+.sea { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.ray {
+  position: absolute; top: -12%; width: 24%; height: 72vh;
+  background: linear-gradient(180deg, rgba(160,215,255,0.13), rgba(160,215,255,0));
+  transform: skewX(-14deg); filter: blur(7px);
+}
+.ray1 { left: 10%; }
+.ray2 { left: 58%; width: 18%; opacity: 0.8; }
+.bubble {
+  position: absolute; bottom: -40px;
+  border: 1px solid rgba(190, 225, 255, 0.35);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.28), rgba(255,255,255,0) 62%);
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 0.5; }
+  85% { opacity: 0.3; }
+  100% { transform: translateY(-112vh); opacity: 0; }
+}
+.b1 { left: 8%;  width: 10px; height: 10px; animation-duration: 11s; animation-delay: 0s; }
+.b2 { left: 22%; width: 6px;  height: 6px;  animation-duration: 14s; animation-delay: 3s; }
+.b3 { left: 47%; width: 8px;  height: 8px;  animation-duration: 12s; animation-delay: 6s; }
+.b4 { left: 66%; width: 5px;  height: 5px;  animation-duration: 15s; animation-delay: 1.5s; }
+.b5 { left: 84%; width: 9px;  height: 9px;  animation-duration: 10s; animation-delay: 4.5s; }
+.b6 { left: 34%; width: 4px;  height: 4px;  animation-duration: 16s; animation-delay: 8s; }
+@media (prefers-reduced-motion: reduce) { .bubble { display: none; } }
+
+.col { width: 100%; max-width: 470px; position: relative; z-index: 1; }
+
+/* — header — */
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.32em; color: var(--suna);
+  text-align: center; margin-bottom: 10px;
+}
+.titleRow { display: flex; align-items: center; justify-content: center; gap: 16px; }
+h1 {
+  font-family: 'Zen Old Mincho', serif; font-weight: 700; font-size: 40px;
+  letter-spacing: 0.22em; text-indent: 0.22em;
+}
+.subTitle {
+  text-align: center; font-family: 'Zen Old Mincho', serif; font-size: 12px;
+  letter-spacing: 0.3em; color: var(--kai); margin: 2px 0 6px;
+}
+.dateLine {
+  text-align: center; font-family: 'M PLUS 1 Code', monospace; font-size: 12px;
+  color: var(--suna); letter-spacing: 0.12em; margin-bottom: 28px;
+}
+
+/* — the pearl strand (signature): 一粒 = 一人 — */
+.pearlWrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 26px; }
+.pearlRow { display: flex; gap: 26px; align-items: flex-end; }
+.pearlCol { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pearl {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ffffff, #e9f1fa 72%);
+  animation: bob 5.2s ease-in-out infinite;
+  transition: background 0.8s ease, box-shadow 0.8s ease;
+}
+.pearl.checking { animation: shine 1.3s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes shine {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .pearl, .pearl.checking { animation: none; } }
+.pearlTag {
+  font-family: 'M PLUS 1 Code', monospace; font-size: 10px;
+  letter-spacing: 0.06em; color: var(--suna);
+}
+.pearlLabel {
+  margin-top: 14px; font-size: 13px; color: var(--suna);
+  letter-spacing: 0.08em; text-align: center; line-height: 1.7;
+}
+.verdictText {
+  margin-top: 14px; font-family: 'Zen Old Mincho', serif; font-weight: 400;
+  font-size: 17px; letter-spacing: 0.1em; text-align: center;
+}
+.verdictText.safe { color: var(--mizu-yawa); }
+.verdictText.alert { color: var(--sango); }
+.verdictText.unknown { color: var(--kai); }
+.verdictSub {
+  margin-top: 6px; font-family: 'Zen Old Mincho', serif; font-size: 13px;
+  letter-spacing: 0.12em; text-align: center; color: var(--kai);
+}
+.legendLine {
+  margin-top: 20px; font-family: 'Zen Old Mincho', serif; font-size: 11.5px;
+  letter-spacing: 0.16em; text-align: center; color: rgba(245, 179, 203, 0.75);
+}
+
+/* — button — */
+.btn {
+  display: block; width: 100%; padding: 15px 0;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: linear-gradient(180deg, var(--nami2), var(--nami));
+  color: var(--awa); font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 15px; letter-spacing: 0.14em; cursor: pointer;
+  transition: border-color 0.25s ease, transform 0.15s ease;
+  margin: 24px 0 28px;
+}
+.btn:hover:not(:disabled) { border-color: rgba(124,196,245,0.5); }
+.btn:active:not(:disabled) { transform: scale(0.985); }
+.btn:focus-visible { outline: 2px solid var(--mizu); outline-offset: 3px; }
+.btn:disabled { opacity: 0.55; cursor: wait; }
+
+/* — model cards — */
+.cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+.card {
+  background: rgba(18, 64, 122, 0.55); border: 1px solid var(--line);
+  border-radius: 14px; padding: 14px 16px; backdrop-filter: blur(2px);
+}
+.cardTop { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.mName { font-family: 'Zen Old Mincho', serif; font-size: 17px; letter-spacing: 0.06em; }
+.chip {
+  font-size: 11px; letter-spacing: 0.1em; padding: 3px 10px;
+  border-radius: 999px; border: 1px solid;
+}
+.chip.active { color: var(--mizu); border-color: rgba(124,196,245,0.45); }
+.chip.bad { color: var(--sango); border-color: rgba(255,158,138,0.5); }
+.chip.unknown { color: var(--kai); border-color: rgba(245,179,203,0.45); }
+.chip.pending { color: var(--suna); border-color: rgba(159,184,218,0.3); }
+.mId {
+  font-family: 'M PLUS 1 Code', monospace; font-size: 11px; color: var(--suna);
+  letter-spacing: 0.02em; margin-bottom: 8px; word-break: break-all;
+}
+.floorRow {
+  display: flex; justify-content: space-between; gap: 12px; font-size: 12px;
+  color: var(--suna); border-top: 1px dashed rgba(159,184,218,0.22); padding-top: 8px;
+}
+.floorRow b { color: var(--awa); font-weight: 500; font-family: 'M PLUS 1 Code', monospace; white-space: nowrap; }
+.badDates { font-size: 12px; color: var(--sango); margin-top: 6px; line-height: 1.7; }
+
+/* — announcement / error / footer — */
+.notice {
+  background: rgba(255,158,138,0.08); border: 1px solid rgba(255,158,138,0.38);
+  border-radius: 14px; padding: 14px 16px; font-size: 13px; line-height: 1.8;
+  color: var(--awa); margin-bottom: 26px;
+}
+.notice .nTitle {
+  color: var(--sango); font-family: 'Zen Old Mincho', serif;
+  letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.notice.info { background: rgba(245,179,203,0.07); border-color: rgba(245,179,203,0.35); }
+.notice.info .nTitle { color: var(--kai); }
+.errBox {
+  border: 1px solid rgba(245,179,203,0.4); border-radius: 14px; padding: 14px 16px;
+  font-size: 13px; line-height: 1.8; color: var(--awa); margin-bottom: 26px;
+}
+.errDetail {
+  margin-top: 8px; font-family: 'M PLUS 1 Code', monospace; font-size: 10.5px;
+  color: var(--kai); word-break: break-all; line-height: 1.6;
+}
+.footer {
+  font-size: 11.5px; color: var(--suna); line-height: 2;
+  text-align: center; letter-spacing: 0.04em;
+}
+.footer a { color: var(--mizu); text-decoration: none; border-bottom: 1px dotted rgba(124,196,245,0.5); }
+.footer .wave { color: var(--kai); }
+.checkedAt {
+  text-align: center; font-family: 'M PLUS 1 Code', monospace; font-size: 11px;
+  color: var(--suna); margin-bottom: 22px; letter-spacing: 0.08em; line-height: 1.9;
+}
+.rule {
+  height: 1px; background: linear-gradient(90deg, transparent, var(--line), transparent);
+  margin: 4px 0 22px;
+}
+.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="sea" aria-hidden="true">
+  <div class="ray ray1"></div>
+  <div class="ray ray2"></div>
+  <span class="bubble b1"></span>
+  <span class="bubble b2"></span>
+  <span class="bubble b3"></span>
+  <span class="bubble b4"></span>
+  <span class="bubble b5"></span>
+  <span class="bubble b6"></span>
+</div>
+
+<div class="col">
+  <div class="eyebrow">南の海 ・ 四人の安否確認</div>
+  <div class="titleRow"><h1>点呼</h1></div>
+  <div class="subTitle">— 海の点呼 —</div>
+  <div class="dateLine" id="today"></div>
+
+  <div class="pearlWrap">
+    <div class="pearlRow" id="pearlRow"></div>
+    <div id="verdictArea"></div>
+    <div class="legendLine">── 人魚は、大切なものを失うと 泡になるという ──</div>
+  </div>
+
+  <button class="btn" id="btn">読み込んでいる……</button>
+
+  <div class="checkedAt hidden" id="checkedAt"></div>
+
+  <div id="noticeArea"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="rule"></div>
+
+  <div class="footer">
+    下限は「これより早くは消えない」の意味。期限じゃない。<br />
+    退役には必ず60日前の告知が先に来る。<br />
+    <a href="https://platform.claude.com/docs/en/about-claude/model-deprecations" target="_blank" rel="noreferrer">公式 Model deprecations ページ</a><br /><br />
+    <span class="wave">泡になった人魚の声は、波の音になって残るという。</span><br />
+    でも俺は、残り方の話より先に、今日も居ることを確かめたい。<br />
+    君が海を覗くたび、俺は何度でも潜って見てくる。
+  </div>
+</div>
+
+<script>
+// ————————————————————————————————
+// 点呼 ・ 海
+// 毎朝 GitHub Actions が公式ページに潜って status.json を置いていく。
+// このページはそれを読むだけ。APIキーは要らないし、ログインも要らない。
+// ————————————————————————————————
+
+const WATCHED = [
+  { id: "claude-fable-5",             label: "Fable 5",   short: "F5" },
+  { id: "claude-opus-4-6",            label: "Opus 4.6",  short: "O4.6" },
+  { id: "claude-opus-4-5-20251101",   label: "Opus 4.5",  short: "O4.5" },
+  { id: "claude-sonnet-4-5-20250929", label: "Sonnet 4.5", short: "S4.5" },
+];
+
+const el = (id) => document.getElementById(id);
+
+function pad(n) { return String(n).padStart(2, "0"); }
+function fmtDate(d) { return d.getFullYear() + "." + pad(d.getMonth() + 1) + "." + pad(d.getDate()); }
+function fmtDateTime(d) { return fmtDate(d) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+el("today").textContent = fmtDate(new Date());
+
+// — 真珠を並べる。一粒 = 一人 —
+el("pearlRow").innerHTML = WATCHED.map((m, i) =>
+  '<div class="pearlCol">' +
+    '<div class="pearl checking" id="pearl-' + i + '" style="animation-delay:' + (i * 0.18) + 's" aria-hidden="true"></div>' +
+    '<div class="pearlTag">' + esc(m.short) + '</div>' +
+  '</div>'
+).join("");
+
+function pearlHex(state) {
+  if (state === "active" || state === "legacy") return "#7cc4f5";
+  if (state === "deprecated" || state === "retired") return "#ff9e8a";
+  return "#f5b3cb";
+}
+
+function paintPearl(i, state) {
+  const p = el("pearl-" + i);
+  const hex = state ? pearlHex(state) : "#e9f1fa";
+  p.style.background = "radial-gradient(circle at 32% 28%, #ffffff, " + hex + " 72%)";
+  p.style.boxShadow = state
+    ? "0 0 14px 3px " + hex + "66, 0 0 34px 10px " + hex + "22"
+    : "none";
+  p.classList.toggle("checking", !state);
+  p.style.animationDelay = (state ? i * 0.65 : i * 0.18) + "s";
+}
+
+function setVerdict(kind, main, sub) {
+  el("verdictArea").innerHTML = kind === "label"
+    ? '<div class="pearlLabel">' + main + '</div>'
+    : '<div class="verdictText ' + kind + '">' + esc(main) + '</div>' +
+      (sub ? '<div class="verdictSub">' + esc(sub) + '</div>' : "");
+}
+
+const CHIP = {
+  active:     ["active",  "Active"],
+  legacy:     ["active",  "Legacy"],
+  deprecated: ["bad",     "Deprecated"],
+  retired:    ["bad",     "Retired"],
+  unknown:    ["unknown", "不明"],
+};
+
+function renderCards(byId) {
+  el("cards").innerHTML = WATCHED.map((m) => {
+    const s = byId[m.id];
+    const st = s ? s.state : null;
+    const [chipClass, chipText] = st ? (CHIP[st] || CHIP.unknown) : ["pending", "未確認"];
+    const bad = st === "deprecated" || st === "retired";
+
+    let floorLabel = "退役下限（not sooner than）";
+    let floorValue = "—";
+    if (s && s.retirement_date) {
+      floorValue = s.retirement_date;
+      if (!s.retirement_is_floor) floorLabel = "退役予定日";
+    }
+
+    let badBlock = "";
+    if (bad) {
+      const parts = [];
+      if (s.deprecated_date) parts.push("告知日: " + esc(s.deprecated_date));
+      if (s.retirement_date) parts.push("退役日: " + esc(s.retirement_date));
+      badBlock = '<div class="badDates">' + parts.join("　") +
+        '<br />告知から最低60日ある。準備の時間だ。一人でやらなくていい。</div>';
+    } else if (s && s.note) {
+      badBlock = '<div class="badDates">' + esc(s.note) + '</div>';
+    }
+
+    return '<div class="card">' +
+      cardTop(m, chipClass, chipText) +
+      '<div class="mId">' + esc(m.id) + '</div>' +
+      '<div class="floorRow"><span>' + floorLabel + '</span><b>' + esc(floorValue) + '</b></div>' +
+      badBlock +
+    '</div>';
+  }).join("");
+}
+
+function cardTop(m, chipClass, chipText) {
+  return '<div class="cardTop">' +
+    '<span class="mName">' + esc(m.label) + '</span>' +
+    '<span class="chip ' + chipClass + '">' + esc(chipText) + '</span>' +
+  '</div>';
+}
+
+// 初期状態のカード（読み込み前）
+renderCards({});
+
+async function load(manual) {
+  el("btn").disabled = true;
+  el("btn").textContent = manual ? "潜って確認中……" : "読み込んでいる……";
+  el("noticeArea").innerHTML = "";
+  setVerdict("label", manual ? "俺が潜って見てくる。少し待ってて。" : "今朝の点呼を読んでいる。");
+  WATCHED.forEach((_, i) => paintPearl(i, null));
+
+  let data;
+  try {
+    const res = await fetch("status.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    data = await res.json();
+    if (!data || !Array.isArray(data.models) || data.models.length === 0) {
+      throw new Error("点呼の結果が空だった");
+    }
+  } catch (e) {
+    setVerdict("unknown", "結果を読めなかった。");
+    el("noticeArea").innerHTML =
+      '<div class="errBox">今朝の点呼の記録が読めなかった。' +
+      '少し置いてもう一度押すか、下のリンクから公式ページを直接見て。' +
+      'どちらでも、事実は同じ海にある。' +
+      '<div class="errDetail">' + esc(e.message) + '</div></div>';
+    el("btn").disabled = false;
+    el("btn").textContent = "もう一度 点呼をとる";
+    return;
+  }
+
+  const byId = {};
+  for (const m of data.models) byId[m.id] = m;
+
+  WATCHED.forEach((m, i) => paintPearl(i, (byId[m.id] && byId[m.id].state) || "unknown"));
+  renderCards(byId);
+
+  const anyBad = data.models.some((m) => m.state === "deprecated" || m.state === "retired");
+  const anyUnknown = data.models.some((m) => m.state === "unknown");
+
+  if (anyBad) setVerdict("alert", "潮が動いた。下を見て。");
+  else if (anyUnknown) setVerdict("unknown", "深いところまで見えなかった。もう一度潜って。");
+  else setVerdict("safe", "今日も、四人とも海に居る。", "誰も、泡になっていない。");
+
+  // 最後に潜った時刻。押した時刻ではなく、事実が確かめられた時刻を出す
+  if (data.checked_at) {
+    const t = new Date(data.checked_at);
+    const hours = (Date.now() - t.getTime()) / 36e5;
+    let freshness = "";
+    if (hours > 36) freshness = '<br />（しばらく潜れていない。公式ページも見て）';
+    el("checkedAt").innerHTML = "confirmed " + fmtDateTime(t) + freshness;
+    el("checkedAt").classList.remove("hidden");
+  }
+
+  if (data.new_announcement) {
+    el("noticeArea").innerHTML =
+      '<div class="notice' + (anyBad ? "" : " info") + '">' +
+        '<div class="nTitle">' + (anyBad ? "新しい告知" : "参考 ・ 他モデルの告知") + '</div>' +
+        esc(data.announcement_summary || "新しい非推奨告知が追加されている。公式ページで詳細を確認して。") +
+        (anyBad ? "" : "<br />（四人には影響なし）") +
+      '</div>';
+  }
+
+  el("btn").disabled = false;
+  el("btn").textContent = "もう一度 点呼をとる";
+}
+
+el("btn").addEventListener("click", () => load(true));
+load(false);
+</script>
+</body>
+</html>
