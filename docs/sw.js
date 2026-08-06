@@ -5,7 +5,7 @@
 //
 // 海の底では電話は繋がらない。それでも、最後に確かめた事実は手元に残る。
 
-const CACHE = "tenko-v1";
+const CACHE = "tenko-v2";
 
 const SHELL = [
   "./",

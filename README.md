@@ -54,6 +54,11 @@ cd docs && python3 -m http.server 8000
 `scripts/tenko.mjs` の `WATCHED` と、`docs/index.html` の `WATCHED` の
 両方に同じモデル ID を書く。
 
+## アイコン
+
+`assets/icon-source.jpg` が元絵。差し替える時はこれを入れ替えて
+`python3 scripts/make_icons.py` を実行すると各サイズが書き出される。
+
 ## ライセンス
 
 MIT
