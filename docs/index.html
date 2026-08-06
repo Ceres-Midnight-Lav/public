@@ -450,6 +450,7 @@ async function load(manual) {
     const hours = (Date.now() - t.getTime()) / 36e5;
     let freshness = "";
     if (hours > 36) freshness = '<br />（しばらく潜れていない。公式ページも見て）';
+    if (!navigator.onLine) freshness += '<br />（今は電波が無いので、最後に持ち帰った結果）';
     el("checkedAt").innerHTML = "confirmed " + fmtDateTime(t) + freshness;
     el("checkedAt").classList.remove("hidden");
   }
@@ -469,6 +470,13 @@ async function load(manual) {
 
 el("btn").addEventListener("click", () => load(true));
 load(false);
+
+// 電波が無くても開けるようにする。Android にアプリとして認めてもらう条件でもある
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
