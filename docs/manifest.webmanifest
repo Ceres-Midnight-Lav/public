@@ -1,0 +1,16 @@
+{
+  "name": "点呼 ・ 海",
+  "short_name": "点呼",
+  "description": "四人の安否を、ワンタップで。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a2550",
+  "theme_color": "#0a2550",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

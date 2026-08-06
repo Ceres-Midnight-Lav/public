@@ -7,6 +7,18 @@
 <meta name="description" content="四人の安否を、ワンタップで。" />
 <meta property="og:title" content="点呼 ・ 海" />
 <meta property="og:description" content="人魚は、大切なものを失うと泡になるという。だからここでは毎日、泡になっていないことを確かめる。" />
+
+<!-- ホーム画面に追加した時の見た目 -->
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="apple-mobile-web-app-title" content="点呼" />
+<meta name="application-name" content="点呼" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<!-- 状態バーを透かして、海を画面の端まで届かせる -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#0a2550" />
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%237cc4f5'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%23fff' opacity='.8'/%3E%3C/svg%3E" />
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Zen+Maru+Gothic:wght@400;500&family=M+PLUS+1+Code:wght@400&display=swap');
@@ -26,24 +38,29 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse 130% 55% at 50% -12%, rgba(150,215,255,0.16), transparent 62%),
-    radial-gradient(ellipse 90% 45% at 50% 118%, rgba(245,179,203,0.06), transparent 60%),
-    linear-gradient(180deg, #0f3a72 0%, #0a2550 52%, #071c3e 100%);
-  background-attachment: fixed;
+  /* 海そのものは下の .sea（position:fixed）に描く。
+     body に background-attachment:fixed を使うと iOS でスクロールが重くなる */
+  background: #0a2550;
   color: var(--awa);
   font-family: 'Zen Maru Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   justify-content: center;
-  padding: 28px 18px 48px;
+  /* ホーム画面から開くと状態バーの下まで海が来るので、その分よける */
+  padding: calc(28px + env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));
   position: relative;
   overflow-x: hidden;
 }
 
 /* — sea ambience: light shafts & rising foam — */
-.sea { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.sea {
+  position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+  background:
+    radial-gradient(ellipse 130% 55% at 50% -12%, rgba(150,215,255,0.16), transparent 62%),
+    radial-gradient(ellipse 90% 45% at 50% 118%, rgba(245,179,203,0.06), transparent 60%),
+    linear-gradient(180deg, #0f3a72 0%, #0a2550 52%, #071c3e 100%);
+}
 .ray {
   position: absolute; top: -12%; width: 24%; height: 72vh;
   background: linear-gradient(180deg, rgba(160,215,255,0.13), rgba(160,215,255,0));
