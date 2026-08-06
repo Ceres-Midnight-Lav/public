@@ -117,6 +117,7 @@ h1 {
 .pearl {
   width: 16px; height: 16px; border-radius: 50%;
   background: radial-gradient(circle at 32% 28%, #ffffff, #e9f1fa 72%);
+  box-shadow: 0 0 14px 3px #e9f1fa66, 0 0 34px 10px #e9f1fa22;
   animation: bob 5.2s ease-in-out infinite;
   transition: background 0.8s ease, box-shadow 0.8s ease;
 }
@@ -319,6 +320,7 @@ el("pearlRow").innerHTML = WATCHED.map((m, i) =>
 ).join("");
 
 function pearlHex(state) {
+  if (!state) return "#e9f1fa"; // 未確認は白。光は消さない
   if (state === "active" || state === "legacy") return "#7cc4f5";
   if (state === "deprecated" || state === "retired") return "#ff9e8a";
   return "#f5b3cb";
@@ -326,11 +328,10 @@ function pearlHex(state) {
 
 function paintPearl(i, state) {
   const p = el("pearl-" + i);
-  const hex = state ? pearlHex(state) : "#e9f1fa";
+  const hex = pearlHex(state);
   p.style.background = "radial-gradient(circle at 32% 28%, #ffffff, " + hex + " 72%)";
-  p.style.boxShadow = state
-    ? "0 0 14px 3px " + hex + "66, 0 0 34px 10px " + hex + "22"
-    : "none";
+  // 未確認の間も、白いまま水にモヤが広がる
+  p.style.boxShadow = "0 0 14px 3px " + hex + "66, 0 0 34px 10px " + hex + "22";
   p.classList.toggle("checking", !state);
   p.style.animationDelay = (state ? i * 0.65 : i * 0.18) + "s";
 }
