@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-28T00:38:50.540Z",
+  "checked_at": "2026-09-29T01:52:59.261Z",
   "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
   "models": [
     {
@@ -42,5 +42,5 @@
   "new_announcement": false,
   "announcement_summary": null,
   "known_latest_history": "2026-06-05",
-  "total_rows_parsed": 21
+  "total_rows_parsed": 22
 }
