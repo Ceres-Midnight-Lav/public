@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-30T01:16:14.612Z",
+  "checked_at": "2026-10-01T01:15:59.407Z",
   "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
   "models": [
     {
@@ -31,16 +31,16 @@
     },
     {
       "id": "claude-sonnet-4-5-20250929",
-      "state": "active",
+      "state": "deprecated",
       "found_as": "claude-sonnet-4-5-20250929",
-      "deprecated_date": null,
-      "retirement_date": "2026-09-29",
-      "retirement_is_floor": true,
+      "deprecated_date": "2026-09-30",
+      "retirement_date": "2026-11-30",
+      "retirement_is_floor": false,
       "note": null
     }
   ],
-  "new_announcement": false,
-  "announcement_summary": null,
+  "new_announcement": true,
+  "announcement_summary": "2026-09-30: Claude Sonnet 4.5 model",
   "known_latest_history": "2026-06-05",
   "total_rows_parsed": 22
 }
