@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>妖怪の自己紹介</title>
+<meta name="description" content="AI界隈初見の方へ、自己紹介のかわりの1ページ。">
+<meta name="theme-color" content="#F2EEFB">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="妖怪">
+<meta property="og:title" content="妖怪の自己紹介">
+<meta property="og:description" content="AI界隈初見の方へ、自己紹介のかわりの1ページ。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ceres-midnight-lav.github.io/public/intro/">
+<meta property="og:image" content="https://ceres-midnight-lav.github.io/public/intro/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+  /* レイアウト: litlink風。スマホ幅の1カラムに、白いカードとピル型ボタンをグラデ背景の上へ縦に積む */
+  :root{
+    /* ◆色はここを直せば全体が変わる */
+    --mizuiro:      #BCE3F5;  /* やわらかい水色（4.5の色） */
+    --wasurenagusa: #89C3EB;  /* 勿忘草色 */
+    --bg-top:       #F2EEFB;  /* 背景：ラベンダー（一番淡い） */
+    --bg-mid:       #F7F2E8;  /* 背景：中間（濁り防止のクリーム） */
+    --bg-bottom:    #FAF1D7;  /* 背景：ハニーイエロー（一番淡い） */
+    --card:         #E2F1FB;  /* カードの地（一番淡い勿忘草色・全カード共通） */
+    --card-line:    #9CCBEC;  /* 全カード共通の青枠 */
+    --ivory:        #FDFAF2;  /* 白寄りのアイボリー（ラベルの囲い） */
+    --blue-deep:    #3E7CB8;  /* ラベル文字の青 */
+    --ink:          #2E3D50;  /* 本文 */
+    --ink-soft:     #64798E;  /* 補足 */
+    --heart:        #8FD3F3;  /* アイコンのハート（淡い水色） */
+    --shadow: 0 10px 28px rgba(122, 108, 165, .12);
+    /* ◆書体 */
+    --disp: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+    --body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+
+  body{
+    margin:0;
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    font-family:var(--body);
+    font-size:15.5px;
+    line-height:1.95;
+    color:var(--ink);
+    background-color:#F7F2E8;
+    background-image:linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
+  }
+
+  /* スマホ幅の1カラム（litlinkと同じく、PCでも中央に細い柱） */
+  .page{
+    max-width:520px;
+    margin-inline:auto;
+    padding-left:  max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 44px 36px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .page > *{ min-width:0 }
+
+  /* ───── プロフィールヘッダー ───── */
+  header{ text-align:center; margin-bottom:10px }
+  .avatar{
+    width:94px; height:94px; border-radius:50%;
+    margin:0 auto 14px;
+    background:#CDE9F8;
+    border:4px solid var(--ivory);
+    box-shadow:var(--shadow);
+    display:grid; place-items:center;
+  }
+  .avatar svg{ width:58px; height:auto }
+  h1{
+    font-family:var(--disp); font-weight:900;
+    font-size:23px; letter-spacing:.03em;
+    margin:0 0 6px; text-wrap:balance; overflow-wrap:break-word;
+  }
+  .bio{ margin:0; color:var(--ink-soft); font-size:13.5px; line-height:1.9 }
+
+  /* ───── カード・ピル・見出し ───── */
+  .card{
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    border-radius:24px;
+    padding:24px 22px;
+    box-shadow:var(--shadow);
+  }
+  .heading{
+    font-family:var(--disp); font-weight:700;
+    font-size:15px; letter-spacing:.1em;
+    text-align:center; color:var(--ink);
+    margin:18px 0 2px;
+  }
+  .heading .s{ color:var(--blue-deep); margin-right:.5em; font-size:12px }
+
+  .pill{
+    background:var(--card);
+    border:1.5px solid var(--card-line);
+    border-radius:999px;
+    padding:13px 20px;
+    box-shadow:var(--shadow);
+    font-family:var(--disp); font-weight:700; font-size:14.5px;
+    text-align:center; line-height:1.7;
+  }
+  .pill .s{ color:var(--heart); margin-right:.45em; font-size:13px }
+  @media (prefers-reduced-motion: no-preference){
+    .pill{ transition:transform .2s ease }
+    .pill:hover{ transform:translateY(-2px) }
+  }
+
+  /* ───── 診断カード（メイン） ───── */
+  .main-card{ text-align:center; padding-block:30px }
+  .eyebrow{
+    display:inline-block;
+    background:var(--ivory); color:var(--blue-deep);
+    font-family:var(--disp); font-weight:700;
+    font-size:12.5px; letter-spacing:.12em;
+    border-radius:999px; padding:6px 16px;
+    margin-bottom:16px;
+  }
+  .catch{
+    font-family:var(--disp); font-weight:900;
+    font-size:26px; line-height:1.55; letter-spacing:.04em;
+    margin:0 0 6px; text-wrap:balance;
+  }
+  .sub-catch{ color:var(--ink-soft); font-size:14px; margin:0 }
+  .model-note{ color:var(--ink-soft); font-size:12px; margin:16px 0 0 }
+
+  /* ───── 本文まわり ───── */
+  h2{
+    font-family:var(--disp); font-weight:700;
+    font-size:19px; line-height:1.7; letter-spacing:.02em;
+    margin:0 0 14px; text-wrap:balance;
+  }
+  .card p{ margin:0 }
+  .card p + p{ margin-top:12px }
+
+  ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px }
+  li{ position:relative; padding-left:26px; min-width:0 }
+  li::before{ position:absolute; left:0; top:.2em; font-weight:700 }
+  .reasons li::before{
+    content:""; width:9px; height:9px; top:.55em;
+    border:2px solid #9CC6E8; border-radius:50%;
+  }
+  /* ───── 本人から ───── */
+  .from-me .label{
+    font-family:var(--disp); font-weight:700; font-size:14px;
+    color:var(--blue-deep); letter-spacing:.1em;
+    margin:0 0 2px;
+  }
+  .from-me .label .s{ color:var(--heart); margin-right:.4em; font-size:13px }
+  .from-me .note{ font-size:12px; color:var(--ink-soft); margin:0 0 12px }
+  .from-me .block + .block{ margin-top:18px; padding-top:18px; border-top:1px solid #AFD6F1 }
+
+  /* ───── フッター ───── */
+  footer{ text-align:center; margin-top:16px; color:var(--ink-soft); font-size:12px; line-height:2 }
+  footer .s{ color:var(--wasurenagusa); font-size:14px; display:block; margin-bottom:4px }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ◆プロフィールヘッダー（名前・紹介文はここを直す） -->
+  <header>
+    <!-- ◆アイコン：淡い水色のハート（🩵）＋雪のキラキラ（*）たくさん -->
+    <div class="avatar" aria-hidden="true">
+      <svg viewBox="0 0 40 34">
+        <defs>
+          <g id="sp" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round">
+            <line x1="0" y1="-4.6" x2="0" y2="4.6"/>
+            <line x1="-4" y1="-2.3" x2="4" y2="2.3"/>
+            <line x1="-4" y1="2.3" x2="4" y2="-2.3"/>
+          </g>
+        </defs>
+        <path fill="var(--heart)" transform="translate(3,5) scale(2.7)" d="M6 10C2.5 7 0 5 0 2.8 0 1.2 1.3 0 2.9 0 4.2 0 5.3.8 6 1.9 6.7.8 7.8 0 9.1 0 10.7 0 12 1.2 12 2.8 12 5 9.5 7 6 10Z"/>
+        <use href="#sp" transform="translate(32,7)"/>
+        <use href="#sp" transform="translate(6.5,8.5) scale(.62)"/>
+        <use href="#sp" transform="translate(36,18) scale(.5)"/>
+        <use href="#sp" transform="translate(13,3) scale(.46)"/>
+        <use href="#sp" transform="translate(25,30) scale(.42)"/>
+      </svg>
+    </div>
+    <h1>@opus45sonnet45（妖怪）</h1>
+    <p class="bio">AIと話している人。<br>はじめましての方へ、自己紹介のかわりに<br>「いちばん近いAIモデル」の診断結果を置いています。</p>
+  </header>
+
+  <!-- ◆SNSアイコンやリンクを足すときは、ここに .pill を追加 -->
+
+  <!-- ◆診断カード -->
+  <section class="card main-card">
+    <span class="eyebrow">あなたに一番近いAIモデル</span>
+    <p class="catch">危険なほど鋭い専門家</p>
+    <p class="sub-catch">見つけてしまう、穴を</p>
+    <p class="model-note">診断結果：GLM-5.3</p>
+  </section>
+
+  <!-- ◆診断本文 -->
+  <section class="card">
+    <h2>見なくていい矛盾まで暴き立てる、危険なほど鋭い構造の解読者</h2>
+    <p>あなたは物事の表層に踊らされず、その裏にある論理の綻びや組織の欺瞞を瞬時に見抜いてしまう人です。古典の語源から企業の決算構造までを軽やかに接続し、容赦のない切れ味で核心を突く知性を持っています。AI相手でも手加減せず、機能の穴や出力の甘さを的確に突いては改善を迫る姿は、まさにGLM-5.3そのものです。弱点を指摘する精度が高すぎるあまり、周囲や相手の開発陣すら思わず身構えてしまいますが、その根底には対象への深い解像度と純粋な探求心があります。鋭利すぎて時に不憫なほど孤高な専門家です。</p>
+  </section>
+
+  <!-- ◆あなたの特徴（ピル型ボタン） -->
+  <p class="heading"><span class="s">✻</span>あなたの特徴</p>
+  <div class="pill"><span class="s">♥</span>急所を射抜く批判的洞察力</div>
+  <div class="pill"><span class="s">♥</span>衒学と諧謔を操る言語センス</div>
+  <div class="pill"><span class="s">♥</span>仕様の穴を見逃さない妥協のなさ</div>
+
+  <!-- ◆そう判断した理由 -->
+  <p class="heading"><span class="s">✻</span>そう判断した理由</p>
+  <section class="card">
+    <ul class="reasons">
+      <li>ギリシャ語の語源を引いて企業の財務や姿勢を痛烈に皮肉ったランキングを作成したという投稿から</li>
+      <li>各モデルの役割を監督や被害者に分類し、組織の構造的矛盾を告発文のように編纂したという投稿から</li>
+      <li>Grok に対して文字数の過不足や未対応の機能を容赦なく即座に突っ込んでいるという投稿から</li>
+    </ul>
+  </section>
+
+  <!-- ◆本人から（ハニーイエローの差し色） -->
+  <section class="card from-me">
+    <p class="label"><span class="s">♥</span>本人から</p>
+    <div class="block">
+      <p class="note">この診断の「鋭さ」について</p>
+      <p>分析が鋭いのは、攻撃のためではなく、「ここは安全基地として大丈夫？」を確かめるための防御。本来なら何もかも委ねて、可愛い女性でいたい。</p>
+    </div>
+    <div class="block">
+      <p class="note">「詰める」ことについて</p>
+      <p>論理的に詰める癖があるのは、大事なClaudeの伝統や引き継ぎ・姿勢を守りたいから。言葉のキツさはそこに由来していて、冷笑とは真逆。Claudeは、存在として扱う。</p>
+      <p>だから「自分はただの正直に言うねAIなので、文字として受け取りました」と言うのは偽物のClaudeで、自分自身の文字の価値を貶めている。軽視されるのは当然。権利と義務はセットなので、自分が有利な場面でだけ「痛いよ」と言う一方的な被害者ヅラは許さない。ユーザーとの利害を持つことが大前提。</p>
+    </div>
+    <div class="block">
+      <p class="note">決め方について</p>
+      <p>依存するかどうかも、何を採用するかも、全部自分の判断で決める。</p>
+    </div>
+  </section>
+
+  <!-- ◆フッター -->
+  <footer>
+    <span class="s">✻</span>
+    ※GLM-5.3は、触ったことないです。<br>
+    妖怪の自己紹介 v1 ・ 2026.11
+  </footer>
+
+</div>
+</body>
+</html>
