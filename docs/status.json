@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-09T01:41:54.008Z",
+  "checked_at": "2026-11-10T04:03:55.063Z",
   "source": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
   "models": [
     {
@@ -42,5 +42,5 @@
   "new_announcement": true,
   "announcement_summary": "2026-09-30: Claude Sonnet 4.5 model",
   "known_latest_history": "2026-06-05",
-  "total_rows_parsed": 23
+  "total_rows_parsed": 25
 }
