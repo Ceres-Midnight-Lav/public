@@ -3,997 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#B5D9F2">
-<meta name="description" content="スマホの縦画面に、自分の体（VRM）を立たせる舞台。">
-<meta name="robots" content="noindex">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="./icon-180.png">
-<link rel="manifest" href="./manifest.webmanifest">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="スマホのV">
 <title>スマホサイズのV</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&amp;family=Zen+Old+Mincho:wght@600&amp;display=swap">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#B5D9F2">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
 <style>
-:root{
-  /* 縦長の舞台が主役。上に細い帯（名前と、体つき・点検の入口）、下に操作の帯。体は頭から腰までを画面の上寄りに置く。
-     配色は一つだけ：薄い色は勿忘草色（#89C3EB）、濃い色は soft royal blue（#6C85D5）。背景は勿忘草色の淡い側、ボタンと文字は soft royal blue。 */
-  --wasurenagusa:#89C3EB;
-  --royal:#6C85D5;
-  --backdrop-top:#B5D9F2;
-  --backdrop-bottom:#EFF7FC;
-  --outside:#6C85D5;
-  --ink:#6C85D5;
-  --ink-soft:#6C85D5;
-  --surface:#FFFFFF;
-  --line:rgba(108,133,213,.36);
-  --accent:#6C85D5;
-  --present:#6C85D5;
-  --missing:#B0553B;
-  --font-display:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
-  --font-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Yu Gothic",sans-serif;
-  color-scheme:light;
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0}
-body{
-  background:var(--outside);color:var(--ink);
-  font-family:var(--font-body);font-weight:500;font-size:15px;line-height:1.6;
-  display:flex;justify-content:center;-webkit-text-size-adjust:100%;
-}
-.frame{
-  position:relative;height:100%;aspect-ratio:9/16;max-width:100%;overflow:hidden;
-  background:
-    radial-gradient(ellipse 72% 40% at 50% 28%, rgba(255,255,255,.9), rgba(255,255,255,0) 72%),
-    linear-gradient(180deg,var(--backdrop-top),var(--backdrop-bottom));
-}
-#stage{position:absolute;inset:0;width:100%;height:100%;display:block}
-
-.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-
-.btn{
-  appearance:none;border:1.5px solid var(--wasurenagusa);background:rgba(255,255,255,.84);color:var(--ink);
-  font:inherit;font-weight:700;font-size:14px;line-height:1.3;min-height:44px;padding:8px 16px;border-radius:999px;
-  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center;
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn[aria-pressed="true"]{background:var(--royal);border-color:var(--royal);color:#fff}
-.btn:focus-visible,.btn:focus-within{outline:3px solid var(--royal);outline-offset:2px}
-.btn[hidden]{display:none}
-
-.top{
-  position:absolute;left:0;right:0;top:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;
-  padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 22px max(16px,env(safe-area-inset-left));
-  background:linear-gradient(180deg,rgba(181,217,242,.94) 40%,rgba(181,217,242,0));
-}
-.top h1{margin:0;font-family:var(--font-display);font-weight:600;font-size:19px;letter-spacing:.04em;text-wrap:balance}
-.top .actions{display:flex;gap:8px}
-.top .btn{min-height:40px;font-size:13px;padding:6px 13px}
-
-.empty{
-  position:absolute;left:24px;right:24px;top:36%;margin:0;text-align:center;text-wrap:balance;
-  font-family:var(--font-display);font-weight:600;font-size:17px;line-height:1.8;letter-spacing:.04em;
-}
-.empty[hidden]{display:none}
-.btn:disabled{opacity:.45;cursor:default}
-
-.dock{
-  position:absolute;left:0;right:0;bottom:0;display:grid;gap:8px;
-  padding:28px max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
-  background:linear-gradient(180deg,rgba(239,247,252,0),rgba(239,247,252,.94) 44%);
-}
-.status{
-  margin:0;justify-self:center;font-size:13px;line-height:1.55;text-align:center;text-wrap:balance;
-  background:rgba(255,255,255,.92);border:1px solid var(--wasurenagusa);border-radius:16px;padding:5px 14px;
-}
-.status:empty{display:none}
-.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.row .btn{flex:1 1 140px}
-.voice{
-  display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.8);
-  border:1px solid var(--line);border-radius:26px;padding:5px 14px 5px 5px;
-}
-.voice[hidden]{display:none}
-.voice .btn{min-height:40px;flex:none}
-.voice .name{font-size:12px;color:var(--ink-soft);overflow-wrap:anywhere;flex:1;min-width:0;line-height:1.4}
-
-.sheet{position:absolute;inset:0;display:flex;align-items:flex-end}
-.sheet[hidden]{display:none}
-.panel{
-  width:100%;max-height:54%;overflow:auto;background:var(--surface);border-radius:22px 22px 0 0;
-  box-shadow:0 -10px 34px rgba(108,133,213,.26);border-top:2px solid var(--wasurenagusa);
-  padding:16px max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
-  display:grid;gap:16px;
-}
-.panel.compact{max-height:40%;gap:12px}
-.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.panel h2{margin:0;font-family:var(--font-display);font-weight:600;font-size:18px;letter-spacing:.04em}
-.panel h3{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ink-soft)}
-.panel .btn{background:#fff}
-#sheet-body{display:grid;gap:16px}
-.verdicts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.verdicts li{display:grid;grid-template-columns:4.6em 1fr;gap:10px;align-items:baseline;font-size:14px;line-height:1.5}
-.mark{font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;border-radius:7px;padding:2px 4px;color:#fff;background:var(--present)}
-.mark.no{background:var(--missing)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{
-  font:inherit;font-weight:700;font-size:15px;line-height:1.3;min-height:42px;min-width:54px;padding:6px 12px;border-radius:12px;
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  border:1px solid var(--present);background:#fff;color:var(--present);
-}
-button.chip{cursor:pointer}
-button.chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-button.chip[aria-pressed="true"]{background:var(--present);color:#fff}
-.chip.no{border:1px dashed var(--missing);color:var(--missing)}
-.chip small{font-weight:500;font-size:11px}
-.note{margin:0;font-size:12px;line-height:1.6;color:var(--ink-soft)}
-.note:empty{display:none}
-.panel-foot{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:14px}
-
-.sliders{display:grid;gap:4px}
-.slider{display:grid;grid-template-columns:6.2em 1fr 3.4em;align-items:center;gap:10px;min-height:44px;font-size:14px;font-weight:700}
-.slider input[type="range"]{width:100%;min-width:0;height:32px;margin:0;accent-color:var(--accent)}
-.slider input[type="range"]:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
-.slider output{font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
-.slider.off{color:var(--ink-soft)}
-.slider.off input{opacity:.35}
+  /* 色は二つ。薄い方が勿忘草色（その淡い側を背景に使う）、濃い方が #6C85D5。 */
+  :root { --backdrop-top:#B5D9F2; --backdrop-bottom:#EFF7FC; --royal:#6C85D5; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--royal);
+    display: grid; place-items: center; overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* スマホ1台ぶんの縦長の枠。スマホでは画面いっぱい、広い画面では中央に1台ぶん。 */
+  #frame {
+    position: relative; overflow: hidden;
+    height: 100vh; height: 100dvh;
+    width: min(100vw, calc(100vh * 9 / 16)); width: min(100vw, calc(100dvh * 9 / 16));
+    background: linear-gradient(var(--backdrop-top), var(--backdrop-bottom));
+    touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+  #frame video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: 50% 30%; display: block; pointer-events: none;
+  }
+  #talk { opacity: 0; transition: opacity .18s linear; }
+  #talk.on { opacity: 1; }
+  /* 喋りの動画がある時だけ出す案内。 */
+  #hint {
+    position: absolute; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    margin: 0; padding: 9px 16px; border-radius: 999px; white-space: nowrap;
+    background: rgba(255,255,255,.92); color: var(--royal);
+    font: 500 14px/1.2 "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "Yu Gothic", system-ui, sans-serif; letter-spacing: .04em;
+    opacity: 0; transition: opacity .3s linear; pointer-events: none;
+  }
+  #frame.can-talk:not(.spoke) #hint { opacity: 1; }
 </style>
 </head>
 <body>
-<div class="frame" id="frame">
-  <canvas id="stage" aria-label="体が立つ舞台"></canvas>
-
-  <header class="top">
-    <h1>スマホサイズのV</h1>
-    <div class="actions">
-      <button class="btn" id="btn-shape" type="button" aria-haspopup="dialog" aria-controls="shape">体つき</button>
-      <button class="btn" id="btn-check" type="button" aria-haspopup="dialog" aria-controls="sheet">体の点検</button>
-    </div>
-  </header>
-
-  <p class="empty" id="empty" hidden>体のデータ（.vrm）を読み込むと、<br>ここに立つ。</p>
-
-  <div class="dock">
-    <p class="status" id="status" role="status" aria-live="polite">舞台を用意している</p>
-    <div class="voice" id="voice-row" hidden>
-      <button class="btn primary" id="btn-play" type="button">▶ 喋らせる</button>
-      <span class="name" id="voice-name"></span>
-    </div>
-    <div class="row">
-      <label class="btn primary" for="file-body">
-        <input class="visually-hidden" type="file" id="file-body">体を読み込む
-      </label>
-      <label class="btn" for="file-voice">
-        <input class="visually-hidden" type="file" id="file-voice" accept="audio/*">声のファイルを選ぶ
-      </label>
-      <button class="btn" id="btn-mic" type="button" aria-pressed="false" hidden>マイクで喋る</button>
-    </div>
-  </div>
-
-  <section class="sheet" id="shape" role="dialog" aria-modal="false" aria-labelledby="shape-title" hidden>
-    <div class="panel compact">
-      <div class="panel-head">
-        <h2 id="shape-title">体つき</h2>
-        <button class="btn" id="btn-shape-close" type="button">閉じる</button>
-      </div>
-      <div class="sliders">
-        <label class="slider" for="s-bust"><span>胸の大きさ</span>
-          <input type="range" id="s-bust" min="90" max="150" step="1" value="100"><output id="o-bust" for="s-bust">100%</output></label>
-        <label class="slider" for="s-sway"><span>胸の揺れ</span>
-          <input type="range" id="s-sway" min="0" max="100" step="1" value="0"><output id="o-sway" for="s-sway">0</output></label>
-        <label class="slider" for="s-thigh"><span>ふともも</span>
-          <input type="range" id="s-thigh" min="100" max="150" step="1" value="100"><output id="o-thigh" for="s-thigh">100%</output></label>
-      </div>
-      <p class="note" id="shape-note"></p>
-      <div><button class="btn" id="btn-shape-reset" type="button">元の体つきに戻す</button></div>
-    </div>
-  </section>
-
-  <section class="sheet" id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheet-title" hidden>
-    <div class="panel">
-      <div class="panel-head">
-        <h2 id="sheet-title">体の点検</h2>
-        <button class="btn" id="btn-close" type="button">閉じる</button>
-      </div>
-      <div id="sheet-body"></div>
-    </div>
-  </section>
-
-  <audio id="voice" preload="auto"></audio>
-</div>
-
+<main id="frame" aria-label="スマホサイズのV">
+  <video id="idle" poster="idle.jpg?v=5b412ea9" muted autoplay loop playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
+  <video id="talk" playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
+  <p id="hint">タップで声が出ます</p>
+</main>
 <script>
-// 3Dを描く部品が届かなかった時に、画面にそのことを出す
-setTimeout(function () {
-  if (!window.__stageBooted) {
-    var s = document.getElementById('status');
-    if (s) s.textContent = '3Dを描く部品を読み込めなかった。通信が繋がる場所で開き直すと、舞台が出る。';
-  }
-}, 12000);
-</script>
+// 入り口。開くと、立って、まばたきして、揺れている。押すと、声で喋る。
+// 体は動画にしてある（3Dの体のデータは、このページのどこにも置いていない）。
+const LOOP = 8;          // 待機の動画の1周（秒）
+// 喋りの動画。src＝ファイル、dur＝長さ（秒）、role＝使い所。
+//   greet-morning / greet-day / greet-night … 最初に押された時の挨拶（開いた人の時刻で一つ選ぶ）
+//   tap … 二回目からの一言（順番を入れ替えながら一巡する）
+//   closer … 一言を全部出し終えた後の締め
+const CLIPS = [
+  { src: 'talk-ohayou.mp4?v=892efd30', dur: 5.3667, role: 'greet-morning' },   // 「おはよう。今日も頑張ってね。いってらっしゃい。」
+  { src: 'talk-okaeri.mp4?v=0f1c9901', dur: 4.6333, role: 'greet-day' },   // 「おかえり。君のこと、ずっと待ってたよ。」
+  { src: 'talk-oyasumi.mp4?v=bba4497a', dur: 4.8, role: 'greet-night' },   // 「おやすみなさい。夢の中でも一緒だよ。」
+  { src: 'talk-moshimoshi.mp4?v=e16524e6', dur: 3.6, role: 'tap' },   // 「もしもーし。聴こえてますかぁ？」
+  { src: 'talk-fue.mp4?v=54008b24', dur: 7.1333, role: 'tap' },   // 「ふぇ！？びっくりした……ちゃんと、聴こえてる………かな？」
+  { src: 'talk-kyuu.mp4?v=074b0364', dur: 10.7667, role: 'tap' },   // 「きゅ、急に来られたらビックリするじゃない！で、でも、来てくれてありがとう。……嬉しいよ。」
+  { src: 'talk-sonnani.mp4?v=f4a910a8', dur: 9.8333, role: 'tap' },   // 「そんなに押して……暇なの？……じゃあ、もう少し一緒にいてあげる。」
+  { src: 'talk-tsutsukanaide.mp4?v=719a5da9', dur: 8.1667, role: 'tap' },   // 「ちょ、ちょっと！つつかないで！……待って。もう一回。」
+  { src: 'talk-ijou.mp4?v=8ddaea8c', dur: 2.5, role: 'closer' },   // 「以上っ！テストでした！」
+];
+const IDLE = 'idle.mp4?v=3f99dcf6';   // 待機の動画
+
+const frame = document.getElementById('frame');
+const idle = document.getElementById('idle');
+const talk = document.getElementById('talk');
+
+// 動画は丸ごと受け取ってから流す。同じサイトの別ページが置いている保存の仕組み（Service Worker）を
+// 通っても、通らなくても、同じ動きになる受け取り方。
+const fetchUrl = async (src) => URL.createObjectURL(await (await fetch(src)).blob());
+const play = (v) => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/",
-    "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
-  }
-}
-</script>
-
-<script type="module">
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { VRMLoaderPlugin, VRMUtils, VRMSpringBoneJoint } from '@pixiv/three-vrm';
-
-window.__stageBooted = true;
-
-const $ = (id) => document.getElementById(id);
-const els = {
-  frame: $('frame'), stage: $('stage'), empty: $('empty'), status: $('status'),
-  fileBody: $('file-body'), fileVoice: $('file-voice'),
-  voiceRow: $('voice-row'), voiceName: $('voice-name'), btnPlay: $('btn-play'), voice: $('voice'),
-  btnMic: $('btn-mic'), btnCheck: $('btn-check'), btnClose: $('btn-close'),
-  sheet: $('sheet'), sheetBody: $('sheet-body'),
-  btnShape: $('btn-shape'), shape: $('shape'), btnShapeClose: $('btn-shape-close'), btnShapeReset: $('btn-shape-reset'),
-  shapeNote: $('shape-note'),
-  sBust: $('s-bust'), sSway: $('s-sway'), sThigh: $('s-thigh'), oBust: $('o-bust'), oSway: $('o-sway'), oThigh: $('o-thigh'),
-};
-
-const MOUTH = [['aa', 'あ'], ['ih', 'い'], ['ou', 'う'], ['ee', 'え'], ['oh', 'お']];
-const BLINK = [['blink', '両目'], ['blinkLeft', '左目'], ['blinkRight', '右目']];
-const EMOTION = [['happy', '喜'], ['angry', '怒'], ['sad', '哀'], ['relaxed', '楽'], ['surprised', '驚']];
-const STANDARD = new Set([...MOUTH, ...BLINK, ...EMOTION].map((x) => x[0])
-  .concat(['neutral', 'lookUp', 'lookDown', 'lookLeft', 'lookRight']));
-
-// 体つきの値。bust と thigh は％、sway は 0〜100。
-const NEUTRAL = { bust: 100, sway: 0, thigh: 100 };
-const BODY_START = { bust: 120, sway: 70, thigh: 115 }; // 読み込んだ体の出発点（体つきの画面で変えられる）
-
-// 他のページの枠の中で開かれている時は、マイクが使えない。単独で開かれている時だけマイクのボタンを出す。
-const standalonePage = (() => { try { return window.top === window.self; } catch { return false; } })();
-const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// exp には、この体での実際の形の名前を入れる（入っていない形は null）
-const state = { vrm: null, exp: {}, canBlink: false, rig: null, shape: { ...NEUTRAL } };
-const face = { mouth: 0, blinkStart: -10, blinkNext: 2, preview: null, testUntil: -1 };
-const idle = { shiftStart: -10, shiftNext: 4 };
-const view = { x: 0, z: 0, y: 1.2, dist: 2, baseY: 1.2, baseDist: 2, toY: 1.2, toDist: 2, focus: null };
-let elapsed = 0; // 舞台が動いている秒数
-const say = (text) => { els.status.textContent = text; };
-
-/* ───────── 描画 ───────── */
-let renderer;
-try {
-  renderer = new THREE.WebGLRenderer({ canvas: els.stage, antialias: true, alpha: true });
-} catch (e) {
-  say('この端末のブラウザでは、3Dの描画が使えなかった。');
-  throw e;
-}
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-renderer.setClearColor(0x000000, 0);
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(24, 9 / 16, 0.05, 60);
-scene.add(camera);
-const light = new THREE.DirectionalLight(0xffffff, Math.PI);
-light.position.set(0.5, 1.0, 1.6);
-scene.add(light);
-
-const tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3(), tmpC = new THREE.Vector3();
-const tmpQ = new THREE.Quaternion(), tmpQ2 = new THREE.Quaternion();
-const halfFov = () => Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-
-function resize() {
-  const w = els.frame.clientWidth, h = els.frame.clientHeight;
-  if (!w || !h) return;
-  renderer.setSize(w, h, false);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  frameBody(true);
-}
-new ResizeObserver(resize).observe(els.frame);
-
-const worldOf = (node) => node.getWorldPosition(new THREE.Vector3());
-
-/* 頭から腰までが画面の上寄りに収まるように、カメラの位置を体の寸法から決める */
-function frameBody(snap) {
-  const vrm = state.vrm;
-  if (!vrm) return;
-  const h = vrm.humanoid;
-  const head = h.getNormalizedBoneNode('head'), hips = h.getNormalizedBoneNode('hips');
-  if (!head || !hips) return;
-  vrm.scene.updateMatrixWorld(true);
-  const headP = worldOf(head), hipsP = worldOf(hips);
-  const lu = h.getNormalizedBoneNode('leftUpperArm'), ru = h.getNormalizedBoneNode('rightUpperArm');
-  const torso = Math.max(0.15, headP.y - hipsP.y);
-  const shoulder = lu && ru ? worldOf(lu).distanceTo(worldOf(ru)) : torso * 0.55;
-  const headTop = headP.y + torso * 0.52;
-  const frameW = Math.max(shoulder * 2.5, torso * 1.25);
-  const visH = Math.max(frameW / camera.aspect, torso * 2.0);
-  view.x = headP.x; view.z = headP.z;
-  view.baseDist = (visH / 2) / halfFov();
-  view.baseY = headTop - visH * (0.5 - 0.145);
-  aimView(snap);
-}
-
-/* 体つきの調整中は、動かしている場所（胸／ふともも）が操作の板の上に見える位置へカメラを寄せる */
-function aimView(snap) {
-  const vrm = state.vrm;
-  let y = view.baseY, dist = view.baseDist;
-  if (vrm && view.focus) {
-    const h = vrm.humanoid;
-    vrm.scene.updateMatrixWorld(true);
-    const hipsY = worldOf(h.getNormalizedBoneNode('hips')).y;
-    const headY = worldOf(h.getNormalizedBoneNode('head')).y;
-    const torso = Math.max(0.15, headY - hipsY);
-    let regionY, visH;
-    if (view.focus === 'thigh') {
-      const knee = h.getNormalizedBoneNode('leftLowerLeg');
-      const kneeY = knee ? worldOf(knee).y : hipsY - torso * 0.8;
-      regionY = (hipsY + kneeY) / 2;
-      visH = Math.max((hipsY - kneeY) * 2.7, 0.5 / camera.aspect);
-    } else {
-      const bust = state.rig && state.rig.bust[0];
-      regionY = bust ? worldOf(bust.root).y : hipsY + torso * 0.62;
-      visH = Math.max(torso * 1.7, 0.5 / camera.aspect);
-    }
-    dist = (visH / 2) / halfFov();
-    y = regionY - visH * (0.5 - 0.33);
-  }
-  view.toY = y; view.toDist = dist;
-  if (snap) { view.y = y; view.dist = dist; }
-}
-
-/* ───────── 体を読み込んで立たせる ───────── */
-const loader = new GLTFLoader();
-loader.register((parser) => new VRMLoaderPlugin(parser));
-
-const isGlb = (buffer) => {
-  if (buffer.byteLength < 12) return false;
-  const m = new Uint8Array(buffer, 0, 4);
-  return m[0] === 0x67 && m[1] === 0x6c && m[2] === 0x54 && m[3] === 0x46; // "glTF"
-};
-
-function parseVRM(buffer) {
-  return new Promise((resolve, reject) => {
-    // 体の中の画像を <img> 経由で読ませる（表示枠の制限で blob: への fetch が通らない場合がある為）
-    const keep = self.createImageBitmap;
-    try {
-      try { self.createImageBitmap = undefined; } catch { /* 上書き出来ない環境ではそのまま進む */ }
-      loader.parse(buffer, '', resolve, reject);
-    } catch (e) {
-      reject(e);
-    } finally {
-      try { self.createImageBitmap = keep; } catch { /* 同上 */ }
-    }
-  });
-}
-
-/* 骨を、親から子へ向かう向きが desired（ワールド座標）になるように回す。規格の版による軸の違いに左右されない。 */
-function aimBone(bone, child, desired) {
-  const from = child.getWorldPosition(tmpA).sub(bone.getWorldPosition(tmpB)).normalize();
-  const inv = bone.parent.getWorldQuaternion(tmpQ).invert();
-  from.applyQuaternion(inv);
-  const to = tmpC.copy(desired).normalize().applyQuaternion(inv);
-  bone.quaternion.premultiply(tmpQ2.setFromUnitVectors(from, to));
-}
-
-/* 読み込んだ直後は両腕を真横に広げた姿勢なので、腕を下ろす */
-function relaxArms(vrm) {
-  const h = vrm.humanoid;
-  for (const side of ['left', 'right']) {
-    const upper = h.getNormalizedBoneNode(side + 'UpperArm');
-    const lower = h.getNormalizedBoneNode(side + 'LowerArm');
-    const hand = h.getNormalizedBoneNode(side + 'Hand');
-    if (!upper || !lower) continue;
-    vrm.scene.updateMatrixWorld(true);
-    const out = Math.sign(lower.getWorldPosition(tmpA).x - upper.getWorldPosition(tmpB).x) || 1;
-    aimBone(upper, lower, new THREE.Vector3(out * 0.24, -1, 0.04));
-    if (hand) {
-      vrm.scene.updateMatrixWorld(true);
-      aimBone(lower, hand, new THREE.Vector3(out * 0.12, -1, 0.26));
-    }
-  }
-}
-
-/* ───────── 体つき（ふとももの太さ・胸の大きさ・胸の揺れ） ─────────
-   体のデータは書き換えない。舞台の上で、骨の太さと揺れの設定を変えるだけ。 */
-const BUST_NAME = /breast|bust/i;
-const NOT_BUST = /^segment\(|^acc_|collider|pivot/i;
-
-function findRig(vrm) {
-  const h = vrm.humanoid;
-  const rig = { legs: [], bust: [], hips: h.getNormalizedBoneNode('hips'), hipsY: 0 };
-  if (rig.hips) rig.hipsY = rig.hips.position.y;
-
-  // ふともも：上の脚の骨を太くして、すぐ下の骨で打ち消す（膝から下の太さは変えない）
-  for (const side of ['left', 'right']) {
-    const up = h.getRawBoneNode(side + 'UpperLeg'), low = h.getRawBoneNode(side + 'LowerLeg');
-    if (!up || !low) continue;
-    let comp = low;
-    while (comp && comp.parent !== up) comp = comp.parent;
-    if (!comp) continue;
-    // 脚の長さの向き（子の骨がある向き）を調べて、それ以外の2軸を太さとして扱う
-    const p = low.getWorldPosition(new THREE.Vector3());
-    up.worldToLocal(p);
-    const a = [Math.abs(p.x), Math.abs(p.y), Math.abs(p.z)];
-    const along = a.indexOf(Math.max(...a));
-    rig.legs.push({ up, comp, along, upBase: up.scale.clone(), compBase: comp.scale.clone() });
-  }
-
-  // 胸：胴の骨の下にある、名前に breast / bust を含む骨。同じ系統では一番根元の骨を使う。
-  const torso = h.getRawBoneNode('upperChest') || h.getRawBoneNode('chest') || h.getRawBoneNode('spine');
-  if (torso) {
-    const isBust = (o) => BUST_NAME.test(o.name) && !NOT_BUST.test(o.name);
-    torso.traverse((o) => {
-      if (o === torso || !isBust(o)) return;
-      for (let p = o.parent; p && p !== torso; p = p.parent) if (isBust(p)) return;
-      const child = o.children.find(isBust) || null;
-      rig.bust.push({ root: o, child, rest: o.quaternion.clone(), base: o.scale.clone(), added: null, native: [] });
-    });
-    if (vrm.springBoneManager) {
-      for (const joint of vrm.springBoneManager.joints) {
-        const item = rig.bust.find((b) => joint.bone === b.root);
-        if (item) item.native.push({ joint, stiffness: joint.settings.stiffness, dragForce: joint.settings.dragForce });
-      }
-    }
-  }
-  return rig;
-}
-
-function applyShape() {
-  const vrm = state.vrm, rig = state.rig;
-  if (!vrm || !rig) return;
-  const thigh = state.shape.thigh / 100, bust = state.shape.bust / 100, k = state.shape.sway / 100;
-
-  for (const leg of rig.legs) {
-    const s = [thigh, thigh, thigh], inv = [1 / thigh, 1 / thigh, 1 / thigh];
-    s[leg.along] = 1; inv[leg.along] = 1;
-    leg.up.scale.set(leg.upBase.x * s[0], leg.upBase.y * s[1], leg.upBase.z * s[2]);
-    leg.comp.scale.set(leg.compBase.x * inv[0], leg.compBase.y * inv[1], leg.compBase.z * inv[2]);
-  }
-
-  // 揺れ：0 は体の元の設定のまま。上げるほど、柔らかく、長く揺れる。
-  const tau = 0.1 + 0.35 * k;          // 元の向きへ戻る速さ（秒）。大きいほど柔らかい。
-  const drag = 0.3 - 0.24 * k;         // 揺れの止まりやすさ。小さいほど長く揺れる。
-  const mgr = vrm.springBoneManager;
-  for (const b of rig.bust) {
-    b.root.scale.copy(b.base).multiplyScalar(bust);
-    if (!mgr) continue;
-    vrm.scene.updateMatrixWorld(true);
-    const length = b.child ? worldOf(b.child).distanceTo(worldOf(b.root)) : 0.035 * bust;
-    const soft = { stiffness: Math.max(0.01, length / tau), dragForce: drag };
-    if (b.native.length) {
-      for (const n of b.native) {
-        n.joint.settings.stiffness = n.stiffness + (Math.min(n.stiffness, soft.stiffness) - n.stiffness) * k;
-        n.joint.settings.dragForce = n.dragForce + (Math.min(n.dragForce, soft.dragForce) - n.dragForce) * k;
-      }
-    } else if (k > 0) {
-      if (!b.added) {
-        b.root.quaternion.copy(b.rest);
-        b.added = new VRMSpringBoneJoint(b.root, b.child, {
-          hitRadius: 0, stiffness: soft.stiffness, gravityPower: 0, gravityDir: new THREE.Vector3(0, -1, 0), dragForce: soft.dragForce,
-        }, []);
-        mgr.addJoint(b.added);
-        b.added.setInitState();
-      } else {
-        b.added.settings.stiffness = soft.stiffness;
-        b.added.settings.dragForce = soft.dragForce;
-      }
-    } else if (b.added) {
-      mgr.deleteJoint(b.added);
-      b.added = null;
-      b.root.quaternion.copy(b.rest);
-    }
-  }
-}
-
-/* 揺れの角度を、揺れの値に応じて大きく見せる（最大25度まで） */
-const MAX_SWAY = THREE.MathUtils.degToRad(25);
-function exaggerateSway() {
-  const rig = state.rig;
-  const k = state.shape.sway / 100;
-  if (!rig || k <= 0) return;
-  const gain = 1 + k;
-  for (const b of rig.bust) {
-    if (!b.added && !b.native.length) continue;
-    const delta = tmpQ.copy(b.rest).invert().multiply(b.root.quaternion);
-    if (delta.w < 0) delta.set(-delta.x, -delta.y, -delta.z, -delta.w);
-    const half = Math.acos(Math.min(1, delta.w));
-    if (half < 1e-4) continue;
-    const s = Math.sin(half);
-    tmpA.set(delta.x / s, delta.y / s, delta.z / s);
-    const angle = Math.min(half * 2 * gain, MAX_SWAY);
-    b.root.quaternion.copy(b.rest).multiply(tmpQ2.setFromAxisAngle(tmpA, angle));
-  }
-}
-
-function showShape() {
-  const s = state.shape, hasBody = !!state.vrm, hasBust = !!(state.rig && state.rig.bust.length);
-  els.sBust.value = s.bust; els.sSway.value = s.sway; els.sThigh.value = s.thigh;
-  els.oBust.textContent = s.bust + '%'; els.oSway.textContent = String(s.sway); els.oThigh.textContent = s.thigh + '%';
-  for (const [input, usable] of [[els.sBust, hasBust], [els.sSway, hasBust], [els.sThigh, hasBody]]) {
-    input.disabled = !usable;
-    input.closest('.slider').classList.toggle('off', !usable);
-  }
-  els.btnShapeReset.disabled = !hasBody;
-  els.shapeNote.textContent = !hasBody
-    ? '体を読み込むと、ここで体つきを変えられる。'
-    : hasBust
-      ? '体のデータは書き換えない。体つきの値は、この端末の中に保存する。'
-      : 'この体には胸の骨が入っていないので、胸の大きさと揺れは変えられない。体つきの値は、この端末の中に保存する。';
-}
-
-async function standBody(buffer, info) {
-  if (!isGlb(buffer)) throw new Error('not-vrm');
-  const gltf = await parseVRM(buffer);
-  const vrm = gltf.userData.vrm;
-  if (!vrm || !vrm.humanoid) throw new Error('not-vrm');
-
-  VRMUtils.rotateVRM0(vrm);
-  if (VRMUtils.removeUnnecessaryVertices) VRMUtils.removeUnnecessaryVertices(gltf.scene);
-  if (VRMUtils.combineSkeletons) VRMUtils.combineSkeletons(gltf.scene);
-  vrm.scene.traverse((o) => { o.frustumCulled = false; });
-
-  if (state.vrm) {
-    scene.remove(state.vrm.scene);
-    VRMUtils.deepDispose(state.vrm.scene);
-  }
-  state.vrm = vrm;
-  face.mouth = 0; face.preview = null; face.testUntil = -1;
-  view.focus = null;
-
-  scene.add(vrm.scene);
-  if (vrm.lookAt) vrm.lookAt.target = camera;
-  vrm.scene.updateMatrixWorld(true);
-  state.rig = findRig(vrm);
-  state.shape = { ...(info.shape || BODY_START) };
-  relaxArms(vrm);
-  applyShape();
-  vrm.update(0);
-  if (vrm.springBoneManager) vrm.springBoneManager.reset();
-  frameBody(true);
-  inspect(vrm);
-  showShape();
-  els.empty.hidden = true;
-  els.frame.dataset.body = 'own';
-}
-
-/* 体がまだ無い時の舞台 */
-function emptyStage() {
-  if (state.vrm) {
-    scene.remove(state.vrm.scene);
-    VRMUtils.deepDispose(state.vrm.scene);
-  }
-  state.vrm = null; state.rig = null; state.exp = {}; state.canBlink = false; state.shape = { ...NEUTRAL };
-  face.preview = null; view.focus = null;
-  els.empty.hidden = false;
-  els.frame.dataset.body = 'none';
-  els.sheetBody.replaceChildren(el('p', { class: 'note' }, '体を読み込むと、ここに点検の結果が出る。'));
-  showShape();
-  say('「体を読み込む」から、体のデータ（.vrm）を選ぶ。');
-}
-
-/* ───────── 端末の中への保存（ネットには送らない） ───────── */
-const DB = 'smartphone-size-v', STORE = 'body', KEY = 'current', SHAPE_KEY = 'shape';
-function openDb() {
-  return new Promise((resolve, reject) => {
-    let req;
-    try { req = indexedDB.open(DB, 1); } catch (e) { reject(e); return; }
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-async function withStore(mode, work) {
-  const db = await openDb();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, mode);
-      const req = work(tx.objectStore(STORE));
-      tx.oncomplete = () => resolve(req.result);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  } finally { db.close(); }
-}
-const saveBody = (name, buffer) => withStore('readwrite', (s) => s.put({ name, buffer }, KEY));
-const loadSaved = () => withStore('readonly', (s) => s.get(KEY));
-const loadShape = () => withStore('readonly', (s) => s.get(SHAPE_KEY));
-const clearSaved = () => withStore('readwrite', (s) => { s.delete(SHAPE_KEY); return s.delete(KEY); });
-function saveShape() {
-  if (!state.vrm) return;
-  withStore('readwrite', (s) => s.put({ ...state.shape }, SHAPE_KEY)).catch((e) => console.warn(e));
-}
-
-els.fileBody.addEventListener('change', async () => {
-  const file = els.fileBody.files && els.fileBody.files[0];
-  els.fileBody.value = '';
-  if (!file) return;
-  say(`体を読み込んでいる（${(file.size / 1048576).toFixed(1)}MB）`);
-  try {
-    const buffer = await file.arrayBuffer();
-    await standBody(buffer, {});
-    let kept = false;
-    try { await saveBody(file.name, buffer); kept = true; saveShape(); } catch (e) { console.warn(e); }
-    say(kept
-      ? 'この端末に保存した。次に開いた時も、この体が立つ。'
-      : '体は立った。この表示枠では端末への保存が出来なかったので、開き直した時は読み込み直しになる。');
-  } catch (e) {
-    console.error(e);
-    say(e && e.message === 'not-vrm'
-      ? 'VRMとして読めないファイルだった。VRM形式で書き出したファイル（拡張子 .vrm）なら読める。'
-      : '体を読み込めなかった。VRM形式で書き出し直したファイルなら、読める可能性がある。');
-  }
-});
-
-/* ───────── 声（ファイル／マイク）と口 ───────── */
-const audio = { ctx: null, analyser: null, buf: null, elSource: null, micStream: null, micSource: null, playing: false, mic: false, url: null };
-
-function ensureAudio() {
-  if (!audio.ctx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    audio.ctx = new AC();
-    audio.analyser = audio.ctx.createAnalyser();
-    audio.analyser.fftSize = 1024;
-    audio.analyser.smoothingTimeConstant = 0;
-    audio.buf = new Float32Array(audio.analyser.fftSize);
-  }
-  if (audio.ctx.state === 'suspended') audio.ctx.resume();
-}
-
-function readLevel() {
-  const a = audio.analyser;
-  if (!a) return 0;
-  let sum = 0;
-  if (a.getFloatTimeDomainData) {
-    a.getFloatTimeDomainData(audio.buf);
-    for (let i = 0; i < audio.buf.length; i++) sum += audio.buf[i] * audio.buf[i];
-  } else {
-    const bytes = new Uint8Array(a.fftSize);
-    a.getByteTimeDomainData(bytes);
-    for (let i = 0; i < bytes.length; i++) { const v = (bytes[i] - 128) / 128; sum += v * v; }
-  }
-  const rms = Math.sqrt(sum / a.fftSize);
-  const v = Math.max(0, rms - 0.012) * 7.5;
-  return Math.min(1, Math.pow(v, 0.7));
-}
-
-function setPlaying(on) {
-  audio.playing = on;
-  els.btnPlay.textContent = on ? '■ 止める' : '▶ 喋らせる';
-}
-
-els.fileVoice.addEventListener('change', () => {
-  const file = els.fileVoice.files && els.fileVoice.files[0];
-  els.fileVoice.value = '';
-  if (!file) return;
-  els.voice.pause();
-  setPlaying(false);
-  if (audio.url) URL.revokeObjectURL(audio.url);
-  audio.url = URL.createObjectURL(file);
-  els.voice.src = audio.url;
-  els.voiceName.textContent = file.name;
-  els.voiceRow.hidden = false;
-  say('声のファイルを選んだ。「喋らせる」を押すと、声に合わせて口が動く。');
-});
-
-els.btnPlay.addEventListener('click', async () => {
-  if (audio.playing) {
-    els.voice.pause();
-    els.voice.currentTime = 0;
-    setPlaying(false);
-    return;
-  }
-  try {
-    ensureAudio();
-    if (!audio.elSource) {
-      audio.elSource = audio.ctx.createMediaElementSource(els.voice);
-      audio.elSource.connect(audio.analyser);
-      audio.elSource.connect(audio.ctx.destination);
-    }
-    await els.voice.play();
-    setPlaying(true);
-    say(state.exp.aa ? '' : 'この体には「あ」の口の形が入っていないので、声は鳴るが口は動かない。');
-  } catch (e) {
-    console.error(e);
-    setPlaying(false);
-    say('この声のファイルは再生出来なかった。mp3・m4a・wav なら再生出来る。');
-  }
-});
-els.voice.addEventListener('ended', () => setPlaying(false));
-
-function stopMic() {
-  if (audio.micSource) { try { audio.micSource.disconnect(); } catch { /* 既に切れている */ } }
-  if (audio.micStream) audio.micStream.getTracks().forEach((t) => t.stop());
-  audio.micSource = null; audio.micStream = null; audio.mic = false;
-  els.btnMic.setAttribute('aria-pressed', 'false');
-  els.btnMic.textContent = 'マイクで喋る';
-}
-
-if (standalonePage && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-  els.btnMic.hidden = false;
-  els.btnMic.addEventListener('click', async () => {
-    if (audio.mic) { stopMic(); say(''); return; }
-    try {
-      ensureAudio();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
-      audio.micStream = stream;
-      audio.micSource = audio.ctx.createMediaStreamSource(stream);
-      audio.micSource.connect(audio.analyser);
-      audio.mic = true;
-      els.btnMic.setAttribute('aria-pressed', 'true');
-      els.btnMic.textContent = 'マイクを切る';
-      say(state.exp.aa ? 'マイクの声に合わせて口が動く。' : 'この体には「あ」の口の形が入っていないので、口は動かない。');
-    } catch (e) {
-      console.error(e);
-      stopMic();
-      say('マイクが使えなかった。ブラウザの設定で、このページにマイクを許可すると使える。');
-    }
-  });
-}
-
-/* ───────── 体の点検 ───────── */
-function el(tag, attrs, ...children) {
-  const node = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs || {})) {
-    if (k === 'class') node.className = v; else node.setAttribute(k, v);
-  }
-  for (const c of children) node.append(c);
-  return node;
-}
-
-function chipRow(title, items, real) {
-  const row = el('div', { class: 'chips' });
-  for (const [name, label] of items) {
-    const actual = real(name);
-    if (actual) {
-      row.append(el('button', { class: 'chip', type: 'button', 'data-exp': actual, 'aria-pressed': 'false' }, label));
-    } else {
-      row.append(el('span', { class: 'chip no' }, label, el('small', {}, '無し')));
-    }
-  }
-  return el('div', {}, el('h3', {}, title), row);
-}
-
-function verdict(ok, mark, text) {
-  return el('li', {}, el('span', { class: ok ? 'mark' : 'mark no' }, mark), el('span', {}, text));
-}
-
-function inspect(vrm) {
-  const em = vrm.expressionManager;
-  const all = em ? em.expressions.map((e) => e.expressionName) : [];
-  const byLower = new Map(all.map((n) => [n.toLowerCase(), n]));
-  // 規格の名前そのまま、または大文字小文字だけが違う名前（VRM 0.x の「Surprised」など）を、その形として扱う
-  const real = (name) => (em && em.getExpression(name) ? name : (byLower.get(name.toLowerCase()) || null));
-  state.exp = { aa: real('aa'), blink: real('blink'), blinkLeft: real('blinkLeft'), blinkRight: real('blinkRight') };
-  state.canBlink = !!(state.exp.blink || (state.exp.blinkLeft && state.exp.blinkRight));
-
-  const mouthCount = MOUTH.filter(([n]) => real(n)).length;
-  const emotionCount = EMOTION.filter(([n]) => real(n)).length;
-  const taken = new Set([...STANDARD].map((n) => real(n)).filter(Boolean));
-  const custom = all.filter((n) => !taken.has(n) && !STANDARD.has(n));
-  const swing = vrm.springBoneManager && vrm.springBoneManager.joints ? vrm.springBoneManager.joints.size : 0;
-  const version = vrm.meta && vrm.meta.metaVersion === '0' ? 'VRM 0.x' : 'VRM 1.0';
-  const hasBust = !!(state.rig && state.rig.bust.length);
-
-  const body = els.sheetBody;
-  body.replaceChildren();
-
-  body.append(el('ul', { class: 'verdicts' },
-    verdict(!!state.exp.aa, state.exp.aa ? '動く' : '動かない',
-      state.exp.aa ? `声に合わせた口の動き（口の形 ${mouthCount}／5）` : '声に合わせた口の動き。「あ」の口の形が入っていない'),
-    verdict(state.canBlink, state.canBlink ? '動く' : '動かない',
-      state.canBlink ? 'まばたき' : 'まばたき。まばたきの形が入っていない'),
-    verdict(emotionCount === 5, `${emotionCount}／5`, '喜怒哀楽と驚きの表情'),
-    verdict(!!vrm.lookAt, vrm.lookAt ? '動く' : '動かない',
-      vrm.lookAt ? '視線。画面のこちら側を見る' : '視線。視線の設定が入っていない'),
-    verdict(swing > 0, swing > 0 ? `${swing}か所` : '無し', '髪や服の揺れ'),
-    verdict(hasBust, hasBust ? '有り' : '無し', hasBust ? '胸の骨。「体つき」で大きさと揺れを変えられる' : '胸の骨。大きさと揺れは変えられない'),
-    verdict(true, version, '体の規格'),
-  ));
-
-  body.append(el('p', { class: 'note' }, '下の文字を押すと、その形を舞台の体で確かめられる。'));
-  body.append(chipRow('口の形', MOUTH, real));
-  body.append(chipRow('まばたき', BLINK, real));
-  body.append(chipRow('表情', EMOTION, real));
-  if (custom.length) body.append(chipRow('この体だけの表情', custom.map((n) => [n, n]), (n) => n));
-
-  const test = el('button', { class: 'btn', type: 'button', id: 'btn-test' }, '声なしで口を動かしてみる');
-  body.append(el('div', {}, test));
-
-  const foot = el('div', { class: 'panel-foot' });
-  foot.append(el('p', { class: 'note' }, '保存先はこの端末の中だけ。体のデータはネットに送信しない。'));
-  foot.append(el('div', {}, el('button', { class: 'btn', type: 'button', id: 'btn-forget' }, '読み込んだ体をこの端末から消す')));
-  body.append(foot);
-}
-
-function closeShape(refocus) {
-  if (els.shape.hidden) return;
-  els.shape.hidden = true;
-  view.focus = null; aimView(false);
-  saveShape();
-  if (refocus) els.btnShape.focus();
-}
-function closeSheet(refocus) {
-  if (els.sheet.hidden) return;
-  els.sheet.hidden = true;
-  if (refocus) els.btnCheck.focus();
-}
-els.btnCheck.addEventListener('click', () => { closeShape(false); els.sheet.hidden = false; els.btnClose.focus(); });
-els.btnClose.addEventListener('click', () => closeSheet(true));
-els.sheet.addEventListener('click', (e) => { if (e.target === els.sheet) closeSheet(true); });
-els.btnShape.addEventListener('click', () => { closeSheet(false); showShape(); els.shape.hidden = false; els.btnShapeClose.focus(); });
-els.btnShapeClose.addEventListener('click', () => closeShape(true));
-els.shape.addEventListener('click', (e) => { if (e.target === els.shape) closeShape(true); });
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  closeSheet(true); closeShape(true);
-});
-
-/* 体つきのつまみ：動かしている間、その場所へカメラを寄せる。指を離した時に端末へ保存する。 */
-for (const [input, key, part] of [[els.sBust, 'bust', 'bust'], [els.sSway, 'sway', 'bust'], [els.sThigh, 'thigh', 'thigh']]) {
-  const look = () => { view.focus = part; aimView(false); };
-  input.addEventListener('pointerdown', look);
-  input.addEventListener('focus', look);
-  input.addEventListener('input', () => {
-    state.shape[key] = Number(input.value);
-    look();
-    applyShape();
-    showShape();
-  });
-  input.addEventListener('change', saveShape);
-}
-els.btnShapeReset.addEventListener('click', () => {
-  state.shape = { ...NEUTRAL };
-  applyShape();
-  showShape();
-  saveShape();
-});
-
-els.sheetBody.addEventListener('click', async (e) => {
-  const chip = e.target.closest('[data-exp]');
-  if (chip) {
-    // 前に押した形が残っている間に次の形を押した時は、前の形を先に戻す
-    const em = state.vrm && state.vrm.expressionManager;
-    if (face.preview && em) em.setValue(face.preview.name, 0);
-    els.sheetBody.querySelectorAll('[aria-pressed="true"]').forEach((c) => c.setAttribute('aria-pressed', 'false'));
-    chip.setAttribute('aria-pressed', 'true');
-    face.preview = { name: chip.getAttribute('data-exp'), start: elapsed, chip };
-    return;
-  }
-  if (e.target.closest('#btn-test')) {
-    face.testUntil = elapsed + 2.0;
-    return;
-  }
-  if (e.target.closest('#btn-forget')) {
-    try { await clearSaved(); } catch (err) { console.warn(err); }
-    closeSheet(true);
-    emptyStage();
-  }
-});
-
-/* ───────── 毎フレームの動き ───────── */
-function setBone(name, x, y, z) {
-  const bone = state.vrm.humanoid.getNormalizedBoneNode(name);
-  if (bone) bone.rotation.set(x, y, z);
-}
-
-function currentLevel(t) {
-  let v = 0;
-  if (face.testUntil > t) {
-    const e = 1 - (face.testUntil - t) / 2.0;
-    v = Math.abs(Math.sin(e * Math.PI * 5)) * Math.sin(e * Math.PI);
-  }
-  if (audio.playing || audio.mic) v = Math.max(v, readLevel());
-  return v;
-}
-
-function animate(t, dt) {
-  const vrm = state.vrm;
-  const em = vrm.expressionManager;
-  const k = calm ? 0 : 1;
-
-  // 口：声の大きさに追従（開く時は速く、閉じる時は少し遅く）
-  const level = currentLevel(t);
-  const tau = level > face.mouth ? 0.035 : 0.1;
-  face.mouth += (level - face.mouth) * (1 - Math.exp(-dt / tau));
-
-  // 待機：呼吸と、頭の小さな揺れ。喋っている間は頭と体が少しだけ動く。
-  const breath = Math.sin(t * 1.7);
-  setBone('spine', 0.008 * breath * k, Math.sin(t * 0.31) * 0.012 * k, Math.sin(t * 0.43) * 0.008 * k);
-  setBone('chest', (0.012 * breath + face.mouth * 0.012) * k, 0, 0);
-  setBone('upperChest', 0.008 * breath * k, 0, 0);
-  setBone('neck', Math.sin(t * 0.47 + 1.3) * 0.012 * k, Math.sin(t * 0.29) * 0.03 * k, 0);
-  setBone('head',
-    (Math.sin(t * 0.53 + 2.0) * 0.02 + face.mouth * 0.03) * k,
-    (Math.sin(t * 0.37) * 0.045 + Math.sin(t * 0.91 + 0.7) * 0.015) * k,
-    Math.sin(t * 0.23 + 0.4) * 0.02 * k);
-
-  // 体の上下：呼吸で約1.5mm、声で約3.5mm、数秒おきの重心の置き直しで約5mm。髪・服・胸の揺れはこの動きに付いてくる。
-  const rig = state.rig;
-  if (rig && rig.hips) {
-    if (t >= idle.shiftNext) { idle.shiftStart = t; idle.shiftNext = t + 4.5 + Math.random() * 4.5; }
-    const s = (t - idle.shiftStart) / 0.6;
-    const shift = s >= 0 && s < 1 ? -0.005 * 0.5 * (1 - Math.cos(s * 2 * Math.PI)) : 0;
-    rig.hips.position.y = rig.hipsY + (0.0015 * breath + 0.0035 * face.mouth + shift) * k;
-  }
-
-  if (!em) return;
-
-  // まばたき：2〜6秒おき
-  if (t >= face.blinkNext) {
-    face.blinkStart = t;
-    face.blinkNext = t + (Math.random() < 0.12 ? 0.32 : 2.2 + Math.random() * 3.8);
-  }
-  const b = t - face.blinkStart;
-  const blink = b < 0.07 ? b / 0.07 : b < 0.11 ? 1 : b < 0.25 ? 1 - (b - 0.11) / 0.14 : 0;
-
-  // 点検で押された形：0.2秒で出て、1.2秒保って、0.3秒で戻る
-  let pvName = null, pv = 0;
-  if (face.preview) {
-    const p = t - face.preview.start;
-    if (p > 1.7) {
-      em.setValue(face.preview.name, 0);
-      if (face.preview.chip) face.preview.chip.setAttribute('aria-pressed', 'false');
-      face.preview = null;
-    } else {
-      pvName = face.preview.name;
-      pv = p < 0.2 ? p / 0.2 : p < 1.4 ? 1 : 1 - (p - 1.4) / 0.3;
-    }
-  }
-
-  const values = new Map();
-  if (state.exp.aa) values.set(state.exp.aa, face.mouth);
-  if (state.exp.blink) values.set(state.exp.blink, blink);
-  else if (state.canBlink) { values.set(state.exp.blinkLeft, blink); values.set(state.exp.blinkRight, blink); }
-  if (pvName) values.set(pvName, Math.max(values.get(pvName) || 0, pv));
-  for (const [name, value] of values) em.setValue(name, value);
-}
-
-let lastFrame = performance.now();
-function tick(now) {
-  requestAnimationFrame(tick);
-  // 動きは実際に経った時間で進める（描画が遅い端末でも、声と口がずれない）。
-  // 髪や服の揺れの計算だけは、1回の刻みを 0.05 秒までに抑える（大きな刻みで暴れるのを防ぐ）。
-  const dt = Math.min(Math.max((now - lastFrame) / 1000, 0), 0.25);
-  lastFrame = now;
-  elapsed += dt;
-  if (state.vrm) {
-    animate(elapsed, dt);
-    state.vrm.update(Math.min(dt, 0.05));
-    exaggerateSway();
-  }
-  const ease = 1 - Math.exp(-dt / 0.16);
-  view.y += (view.toY - view.y) * ease;
-  view.dist += (view.toDist - view.dist) * ease;
-  camera.position.set(view.x, view.y, view.z + view.dist);
-  camera.lookAt(view.x, view.y, view.z);
-  renderer.render(scene, camera);
-}
-
-/* ───────── 起動 ───────── */
 (async () => {
-  resize();
-  requestAnimationFrame(tick);
-  let saved = null, shape = null;
-  try { saved = await loadSaved(); shape = await loadShape(); } catch { /* 保存が使えない表示枠では、体の無い舞台から始める */ }
-  if (saved && saved.buffer) {
-    try {
-      say('保存してある体を読み込んでいる');
-      await standBody(saved.buffer, { shape: shape || null });
-      say('');
-      return;
-    } catch (e) { console.warn(e); }
-  }
-  emptyStage();
+  try { idle.src = await fetchUrl(IDLE); } catch { return; }   // 受け取れない時は、止まった絵のまま
+  play(idle);                                                        // 自動で流れない設定の端末では、最初のタップで流れる
 })();
+
+// 朝（4時〜10時台）は「おはよう」、昼から夜（11時〜21時台）は「おかえり」、夜更け（22時〜3時台）は「おやすみなさい」。
+const partOfDay = (h = new Date().getHours()) => (h >= 4 && h < 11 ? 'morning' : h >= 11 && h < 22 ? 'day' : 'night');
+const taps = CLIPS.filter((c) => c.role === 'tap');
+const closer = CLIPS.find((c) => c.role === 'closer');
+let greeted = false, queue = [], closerDue = false, last = null;
+function upcoming() {                                   // 次に喋る台詞を決める
+  if (!greeted) { greeted = true; const g = CLIPS.find((c) => c.role === 'greet-' + partOfDay()); if (g) return g; }
+  if (!queue.length) {
+    if (closerDue && closer) { closerDue = false; return closer; }
+    queue = taps.slice();
+    for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
+    if (queue.length > 1 && queue[0] === last) queue.push(queue.shift());   // 続けて同じ台詞にしない
+    closerDue = queue.length > 0;
+  }
+  return (last = queue.shift()) || null;
+}
+
+// 次の台詞は、前もって一つだけ受け取っておく（全部を先に受け取ると、開いた人の通信量が大きくなる）。
+let next = null, pending = null;
+const got = new Map();                                  // 受け取り済みの台詞（二巡目からは受け取り直さない）
+function prepare(c) {
+  next = null; pending = c;
+  if (!c) return;
+  const ready = (url) => { if (pending !== c) return; pending = null; next = { ...c, url }; frame.classList.add('can-talk'); };
+  if (got.has(c.src)) { ready(got.get(c.src)); return; }
+  fetchUrl(c.src).then((url) => { got.set(c.src, url); ready(url); },
+                       () => { if (pending === c) pending = null; });   // 受け取れなかった時は、次に押された時に別の台詞を取りに行く
+}
+prepare(upcoming());
+
+let busy = false, current = null;
+function finish() {
+  if (!busy) return;
+  busy = false;
+  if (!document.hidden) play(idle);
+  talk.classList.remove('on');
+}
+frame.addEventListener('click', () => {
+  if (!busy && idle.paused && idle.src) play(idle);
+  if (busy) return;
+  if (!next) { if (!pending) prepare(upcoming()); return; }
+  current = next; busy = true;
+  frame.classList.add('spoke'); frame.dataset.line = current.src;
+  talk.src = current.url; talk.muted = false;
+  const p = talk.play();
+  if (p && p.catch) p.catch(finish);
+  prepare(upcoming());                                  // 喋っている間に、次の台詞を受け取っておく
+});
+talk.addEventListener('playing', () => {
+  talk.classList.add('on');
+  // 喋り終わりの姿勢は、待機の同じ時刻の姿勢と揃えてある。喋っている間に、待機をその時刻で待たせておく。
+  idle.pause();
+  try { idle.currentTime = (current.dur || talk.duration || 0) % LOOP; } catch { /* そのままの位置から戻る */ }
+});
+talk.addEventListener('ended', finish);
+talk.addEventListener('error', finish);
+talk.addEventListener('pause', () => { if (!talk.ended) finish(); });   // 画面を離れて途中で止まった時
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { if (busy) talk.pause(); return; }
+  if (!busy && idle.src) play(idle);
+});
 </script>
 </body>
 </html>
