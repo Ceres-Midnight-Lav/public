@@ -253,7 +253,7 @@ const STANDARD = new Set([...MOUTH, ...BLINK, ...EMOTION].map((x) => x[0])
 
 // 体つきの値。bust と thigh は％、sway は 0〜100。
 const NEUTRAL = { bust: 100, sway: 0, thigh: 100 };
-const BODY_START = { bust: 120, sway: 70, thigh: 130 }; // 読み込んだ体の出発点（体つきの画面で変えられる）
+const BODY_START = { bust: 120, sway: 70, thigh: 115 }; // 読み込んだ体の出発点（体つきの画面で変えられる）
 
 // 他のページの枠の中で開かれている時は、マイクが使えない。単独で開かれている時だけマイクのボタンを出す。
 const standalonePage = (() => { try { return window.top === window.self; } catch { return false; } })();
