@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>スマホサイズのV</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#9297CA">
+<meta name="theme-color" content="#6E73AB">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -21,7 +21,7 @@
   /* 色は二つ。薄い方が勿忘草色、濃い方が #6C85D5。字は丸ゴシック一つ。
      押す物と吹き出しは、角を無くして、上からの光・下の色づき・落ちる影で厚みを付ける（柔らかい硝子の粒）。 */
   :root {
-    --backdrop-top:#9297CA; --backdrop-bottom:#9F9CD2;   /* 動画が届く前に見える地の色（背景の絵の上と下の色） */
+    --backdrop-top:#6E73AB; --backdrop-bottom:#9E9CD3;   /* 動画が届く前に見える地の色（背景の絵の上と下の色） */
     --wasurenagusa:#89C3EB; --royal:#6C85D5;
     --shade: 72,92,170;                                   /* 影の色（#6C85D5 を少し深くした青） */
     --ui:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
@@ -126,7 +126,7 @@
   @keyframes bump { 35% { transform: scale(1.18); } }
 
   /* Vの台詞（吹き出し）。一区切りずつ出す。喋っている間は押す物が下がって、吹き出しが一番下に来る（体に掛からない）。
-     角の無い粒の形。しっぽは上、Vの口の方へ丸く伸びる。影は、粒としっぽをまとめて落とす。 */
+     角の無い粒の形（しっぽは付けない）。 */
   #say {
     position: absolute; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom));
     width: max-content; max-width: calc(100% - 32px); min-width: 76px; transform: translate(-50%, 10px) scale(.86);
@@ -139,10 +139,6 @@
     opacity: 0; transition: opacity .16s linear, transform .3s var(--spring); pointer-events: none;
   }
   #say.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  #say::before {                                          /* しっぽ */
-    content: ""; position: absolute; left: 50%; bottom: calc(100% + 1px); width: 26px; height: 14px; margin-left: -13px;
-    background: rgba(255,255,255,.72); clip-path: path("M0 14 C7 14 9 4 13 0 C17 4 19 14 26 14 Z");
-  }
   #say .ch { opacity: 0; transition: opacity .18s ease-out; }
   #say .ch.in { opacity: 1; }
 
