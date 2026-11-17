@@ -26,9 +26,13 @@
     --shade: 72,92,170;                                   /* 影の色（#6C85D5 を少し深くした青） */
     --ui:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
     --spring: cubic-bezier(.34,1.56,.64,1);               /* ふわっと行き過ぎて戻る動き */
-    --glass: radial-gradient(130% 120% at 30% 12%, #fff 0%, rgba(255,255,255,.97) 42%, rgba(228,235,255,.93) 100%);
-    --lift: 0 0 0 5px rgba(255,255,255,.22), 0 0 18px rgba(255,255,255,.40), 0 12px 24px rgba(var(--shade),.40), 0 3px 6px rgba(var(--shade),.28), inset 0 2px 1px rgba(255,255,255,.98), inset 0 -10px 16px rgba(137,195,235,.30);   /* 外の淡い光の輪・落ちる影・上の光・下の色づき */
-    --press: 0 3px 8px rgba(var(--shade),.34), inset 0 3px 7px rgba(var(--shade),.20);
+    /* 押す物の厚み：面（上から光・下に陰）＋横から見える側面（--side）＋下に落ちる影。押すと側面の分だけ沈む。 */
+    --face: radial-gradient(62% 44% at 50% 14%, #fff 0%, rgba(255,255,255,0) 100%), linear-gradient(180deg, #FFFFFF 0%, #F3F6FF 48%, #D3DCFA 100%);
+    --side: #9AABE6; --side-edge: #7F92D9;
+    --raise: inset 0 3px 2px rgba(255,255,255,.98), inset 0 -7px 10px rgba(108,133,213,.34), 0 6px 0 var(--side), 0 7.5px 0 var(--side-edge), 0 16px 20px rgba(36,50,120,.50), 0 3px 4px rgba(36,50,120,.30);
+    --sunk: inset 0 3px 2px rgba(255,255,255,.9), inset 0 -4px 8px rgba(108,133,213,.34), 0 1px 0 var(--side), 0 2px 0 var(--side-edge), 0 5px 8px rgba(36,50,120,.45);
+    --raise-s: inset 0 2px 2px rgba(255,255,255,.98), inset 0 -5px 8px rgba(108,133,213,.30), 0 4px 0 var(--side), 0 5px 0 var(--side-edge), 0 11px 14px rgba(36,50,120,.44), 0 2px 3px rgba(36,50,120,.28);
+    --sunk-s: inset 0 2px 2px rgba(255,255,255,.9), inset 0 -3px 6px rgba(108,133,213,.30), 0 1px 0 var(--side), 0 1.5px 0 var(--side-edge), 0 4px 6px rgba(36,50,120,.40);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -67,12 +71,30 @@
     animation: ripple .7s cubic-bezier(.2,.7,.3,1) forwards;
   }
   @keyframes ripple { from { transform: scale(.5); opacity: .95; } to { transform: scale(7); opacity: 0; } }
-  .heart { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; opacity: 0; animation: heart 1.1s cubic-bezier(.2,.7,.3,1) forwards; filter: drop-shadow(0 3px 4px rgba(var(--shade),.35)); }
+  .heart { position: absolute; opacity: 0; animation: heart 1.1s cubic-bezier(.2,.7,.3,1) forwards; filter: drop-shadow(0 3px 4px rgba(36,50,120,.38)); }
   .heart svg { display: block; width: 100%; height: 100%; }
   @keyframes heart {
-    0% { transform: translate(0, 0) scale(.3); opacity: 0; }
-    18% { transform: translate(calc(var(--dx) * .2), -18px) scale(1.15); opacity: 1; }
-    100% { transform: translate(var(--dx), -92px) scale(.95); opacity: 0; }
+    0% { transform: translate(0, 0) scale(.3) rotate(0deg); opacity: 0; }
+    18% { transform: translate(calc(var(--dx) * .2), calc(var(--dy) * .2)) scale(1.18) rotate(calc(var(--rot) * .3)); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(.9) rotate(var(--rot)); opacity: 0; }
+  }
+  /* キラキラ：細い十字の光。弾けて散る物（.spark）と、その場で瞬く物（.twinkle）。 */
+  .spark {
+    position: absolute; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); opacity: 0;
+    filter: drop-shadow(0 0 3px rgba(255,255,255,.95)) drop-shadow(0 0 7px rgba(137,195,235,.9));
+    animation: spark var(--t) ease-out var(--d, 0s) forwards;
+  }
+  .spark svg { display: block; width: 100%; height: 100%; }
+  @keyframes spark {
+    0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
+    30% { transform: translate(calc(var(--dx) * .55), calc(var(--dy) * .55)) scale(1) rotate(35deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(90deg); opacity: 0; }
+  }
+  .spark.twinkle { animation-name: twinkle; animation-timing-function: ease-in-out; }
+  @keyframes twinkle {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1) rotate(45deg); opacity: .95; }
+    100% { transform: scale(0) rotate(90deg); opacity: 0; }
   }
   /* つつく指。指先が、押した所に来る。右から二回突いて、引っ込む（右端に近い所では、左から）。 */
   .finger { position: absolute; transform: translate(2px, -46%); pointer-events: none; filter: drop-shadow(0 5px 6px rgba(var(--shade),.4)); }
@@ -94,67 +116,68 @@
   /* 聞いたボイスの数（右上） */
   #count {
     position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px;
-    padding: 9px 16px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.95);
-    background: var(--glass); box-shadow: var(--lift); cursor: pointer;
+    padding: 9px 16px 10px; border-radius: 999px; border: 0;
+    background: var(--face); box-shadow: var(--raise-s); cursor: pointer;
     font-size: 13px; font-weight: 700; letter-spacing: .05em; font-variant-numeric: tabular-nums;
-    transition: transform .14s ease, box-shadow .14s ease;
+    transition: transform .1s ease, box-shadow .1s ease;
   }
-  #count:active { transform: translateY(2px) scale(.96); box-shadow: var(--press); }
+  #count:active { transform: translateY(4px); box-shadow: var(--sunk-s); }
   #count.bump { animation: bump .6s var(--spring); }
   @keyframes bump { 35% { transform: scale(1.18); } }
 
   /* Vの台詞（吹き出し）。一区切りずつ出す。喋っている間は押す物が下がって、吹き出しが一番下に来る（体に掛からない）。
      角の無い粒の形。しっぽは上、Vの口の方へ丸く伸びる。影は、粒としっぽをまとめて落とす。 */
   #say {
-    position: absolute; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom));
+    position: absolute; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom));
     width: max-content; max-width: calc(100% - 32px); min-width: 76px; transform: translate(-50%, 10px) scale(.86);
-    margin: 0; padding: 12px 22px 13px; border-radius: 26px; border: 1px solid rgba(255,255,255,.95);
-    background: linear-gradient(180deg, #fff 0%, #fff 46%, #E9EEFF 100%);
-    box-shadow: inset 0 -6px 12px rgba(137,195,235,.26);
-    filter: drop-shadow(0 0 7px rgba(255,255,255,.55)) drop-shadow(0 9px 12px rgba(var(--shade),.38)) drop-shadow(0 2px 3px rgba(var(--shade),.24));
+    margin: 0; padding: 12px 22px 13px; border-radius: 26px; border: 1.5px solid rgba(255,255,255,.85);
+    background: linear-gradient(180deg, rgba(255,255,255,.66), rgba(236,241,255,.50));           /* 半透明 */
+    -webkit-backdrop-filter: blur(9px) saturate(1.15); backdrop-filter: blur(9px) saturate(1.15);   /* 後ろの絵を少しぼかして、字を読めるようにする */
+    box-shadow: inset 0 2px 2px rgba(255,255,255,.9), inset 0 -6px 12px rgba(137,195,235,.22), 0 10px 18px rgba(36,50,120,.34), 0 2px 4px rgba(36,50,120,.22);
     font-weight: 700; font-size: 16px; line-height: 1.6; letter-spacing: .04em; text-align: center; text-wrap: balance;
+    text-shadow: 0 0 6px rgba(255,255,255,.95), 0 0 2px #fff, 0 1px 0 #fff;
     opacity: 0; transition: opacity .16s linear, transform .3s var(--spring); pointer-events: none;
   }
   #say.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
   #say::before {                                          /* しっぽ */
-    content: ""; position: absolute; left: 50%; bottom: calc(100% - 3px); width: 26px; height: 15px; margin-left: -13px;
-    background: #fff; clip-path: path("M0 15 C7 15 9 4 13 0 C17 4 19 15 26 15 Z");
+    content: ""; position: absolute; left: 50%; bottom: calc(100% + 1px); width: 26px; height: 14px; margin-left: -13px;
+    background: rgba(255,255,255,.72); clip-path: path("M0 14 C7 14 9 4 13 0 C17 4 19 14 26 14 Z");
   }
   #say .ch { opacity: 0; transition: opacity .18s ease-out; }
   #say .ch.in { opacity: 1; }
 
   /* 最初だけ出す断り書き */
   #note {
-    position: absolute; left: 50%; bottom: calc(106px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    position: absolute; left: 50%; bottom: calc(118px + env(safe-area-inset-bottom)); transform: translateX(-50%);
     margin: 0; padding: 8px 15px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(255,255,255,.9);
-    background: rgba(255,255,255,.86); box-shadow: 0 6px 14px rgba(var(--shade),.28);
+    background: rgba(255,255,255,.80); box-shadow: 0 6px 14px rgba(36,50,120,.30);
     font-size: 13px; font-weight: 700; letter-spacing: .05em;
     transition: opacity .3s linear; pointer-events: none;
   }
   #frame.acted #note { opacity: 0; }
 
-  /* 押す物（下）。丸い硝子の粒：上に光、下に色づき、下へ影。押すと沈む。 */
+  /* 押す物（下）。厚みのある丸いボタン：面に光と陰、下に側面、その下に影。押すと、側面の分だけ沈む。 */
   #acts {
-    position: absolute; left: 0; right: 0; bottom: calc(20px + env(safe-area-inset-bottom));
+    position: absolute; left: 0; right: 0; bottom: calc(30px + env(safe-area-inset-bottom));
     display: flex; justify-content: center; gap: 20px;
     transition: opacity .2s linear, transform .3s var(--spring);
   }
   #frame.speaking #acts { opacity: 0; transform: translateY(14px) scale(.94); pointer-events: none; }
   #acts button {
-    position: relative; width: 70px; height: 70px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,.95);
-    background: var(--glass); box-shadow: var(--lift); cursor: pointer;
+    position: relative; width: 70px; height: 70px; padding: 0; border-radius: 50%; border: 0;
+    background: var(--face); box-shadow: var(--raise); cursor: pointer;
     display: grid; place-content: center; justify-items: center; gap: 3px;
-    transition: transform .14s ease, box-shadow .14s ease, opacity .2s linear;
+    transition: transform .1s ease, box-shadow .1s ease, opacity .2s linear;
   }
-  #acts button::before {                                  /* 上側に乗る光 */
-    content: ""; position: absolute; left: 16%; right: 16%; top: 5%; height: 36%; border-radius: 50%;
-    background: linear-gradient(rgba(255,255,255,.95), rgba(255,255,255,0)); pointer-events: none;
+  #acts button::after {                                   /* 面の縁に乗る細い光の輪 */
+    content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.95), inset 0 -2px 0 1.5px rgba(154,171,230,.55);
   }
-  #acts button svg { position: relative; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  #acts button .emoji { position: relative; display: block; height: 26px; font-size: 24px; line-height: 26px; font-weight: 400; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
-  #acts button span { position: relative; font-size: 11px; font-weight: 700; letter-spacing: .05em; line-height: 1; }
-  #acts button:active { transform: translateY(3px) scale(.95); box-shadow: var(--press); }
-  #acts button[disabled] { opacity: .55; cursor: default; }
+  #acts button svg { position: relative; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1.5px 0 rgba(255,255,255,.95)); }
+  #acts button .emoji { position: relative; display: block; height: 26px; font-size: 24px; line-height: 26px; font-weight: 400; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; filter: drop-shadow(0 2px 1.5px rgba(36,50,120,.35)); }
+  #acts button span { position: relative; font-size: 11px; font-weight: 700; letter-spacing: .05em; line-height: 1; text-shadow: 0 1px 0 #fff; }
+  #acts button:active { transform: translateY(5px); box-shadow: var(--sunk); }
+  #acts button[disabled] { opacity: .6; cursor: default; }
 
   /* ボイスの一覧（下から出る） */
   #sheet { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-end; background: rgba(var(--shade),.34); cursor: default; }
@@ -170,25 +193,25 @@
   #panel header { display: flex; align-items: center; justify-content: space-between; margin: 0 6px 10px; }
   #panel h2 { margin: 0; font-weight: 700; font-size: 19px; letter-spacing: .05em; font-variant-numeric: tabular-nums; }
   #close {
-    border: 1px solid rgba(255,255,255,.95); border-radius: 999px; padding: 8px 16px 9px; cursor: pointer;
-    background: var(--glass); box-shadow: 0 6px 12px rgba(var(--shade),.26), inset 0 2px 1px rgba(255,255,255,.98), inset 0 -6px 10px rgba(137,195,235,.26);
-    font-size: 13px; font-weight: 700; letter-spacing: .05em; transition: transform .14s ease, box-shadow .14s ease;
+    border: 0; border-radius: 999px; padding: 8px 16px 9px; cursor: pointer; margin-bottom: 6px;
+    background: var(--face); box-shadow: var(--raise-s);
+    font-size: 13px; font-weight: 700; letter-spacing: .05em; transition: transform .1s ease, box-shadow .1s ease;
   }
-  #close:active { transform: translateY(2px) scale(.96); box-shadow: var(--press); }
-  #voices { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+  #close:active { transform: translateY(4px); box-shadow: var(--sunk-s); }
+  #voices { list-style: none; margin: 0; padding: 0 0 8px; display: grid; gap: 13px; }
   #voices button, #voices p { display: block; width: 100%; margin: 0; padding: 12px 16px 13px; border-radius: 20px; text-align: left; }
   #voices button {
-    border: 1px solid rgba(255,255,255,.95); cursor: pointer;
-    background: linear-gradient(180deg, #fff, #EAF0FF); box-shadow: 0 6px 12px rgba(var(--shade),.20), inset 0 2px 1px #fff, inset 0 -6px 10px rgba(137,195,235,.20);
-    font-weight: 700; font-size: 15px; line-height: 1.6; letter-spacing: .03em; transition: transform .14s ease, box-shadow .14s ease;
+    border: 0; cursor: pointer;
+    background: var(--face); box-shadow: var(--raise-s);
+    font-weight: 700; font-size: 15px; line-height: 1.6; letter-spacing: .03em; transition: transform .1s ease, box-shadow .1s ease;
   }
-  #voices button:active { transform: translateY(2px) scale(.985); box-shadow: var(--press); }
+  #voices button:active { transform: translateY(4px); box-shadow: var(--sunk-s); }
   #voices button::before { content: "▶"; font-size: 10px; margin-right: 10px; vertical-align: 2px; opacity: .8; }
   #voices p { background: rgba(137,195,235,.16); font-size: 13px; font-weight: 500; line-height: 1.6; opacity: .82; }
 
   :is(#acts button, #count, #close, #voices button):focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) {
-    .ripple, .heart, #count.bump, #panel { animation-duration: .01s; }
+    .ripple, .heart, .spark, #count.bump, #panel { animation-duration: .01s !important; }
     .finger b { animation-duration: .5s; }
     #frame.poked video { animation: none; }
     #say, #acts, #acts button, #talk, #say .ch { transition: none; }
@@ -321,11 +344,15 @@ function refresh() {
   frame.classList.toggle('speaking', busy);
 }
 function act(name, x, y, viaButton) {
-  if (name === 'poke' && viaButton) [x, y] = videoPoint(0.62, 0.315);   // ボタンで押した時は、頬をつつく
+  const px = x, py = y;                                 // 押した所
+  if (name === 'poke' && viaButton) [x, y] = videoPoint(...SPOT.cheek);   // ボタンで押した時は、頬をつつく
   if (!busy && idle.paused && idle.src) play(idle);
   const c = busy ? null : closerDue() && got.has(closer.name) ? closer : ready[name];
-  if (name === 'poke' && c) poke(x, y); else ripple(x, y);
+  sparkles(px, py, viaButton ? 7 : 4, viaButton ? 44 : 34);            // 押した所で、キラキラが弾ける
+  if (name === 'poke' && c) poke(x, y); else ripple(px, py);
   if (!c) return;
+  if (name === 'greet') setTimeout(() => { const [hx, hy] = videoPoint(...SPOT.chest); hearts(hx, hy, 8); sparkles(hx, hy, 6, 90); }, 220);   // あいさつ：胸元からハート
+  if (name === 'call') setTimeout(() => { const [hx, hy] = videoPoint(...SPOT.head); sparkles(hx, hy, 12, 120); hearts(hx, hy, 3); }, 220);   // 呼ぶ：頭の周りにキラキラ
   speak(c, name);
   if (c !== closer) prepare(name);                      // 喋っている間に、次の台詞を受け取っておく
 }
@@ -345,7 +372,11 @@ function finish() {
   busy = false; speakingAct = null;
   if (!document.hidden) play(idle);
   talk.classList.remove('on');
-  if (whole && current && !heard.has(current.name)) { heard.add(current.name); remember(); showCount(true); }
+  if (whole && current && !heard.has(current.name)) {
+    heard.add(current.name); remember(); showCount(true);
+    const r = $('count').getBoundingClientRect(), box = frame.getBoundingClientRect();   // 数が増えた時：右上でキラキラとハート
+    sparkles(r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top, 10, 54); hearts(r.left + r.width / 2 - box.left, r.bottom - box.top, 3);
+  }
   say.classList.remove('on');
   refresh();
   if (closerDue() && !got.has(closer.name)) load(closer).catch(() => {});
@@ -396,6 +427,7 @@ function showLine(c) {
         const first = shownPhrase < 0; shownPhrase = k;
         say.textContent = ''; spans = phrases[k].map((ch) => { const e = document.createElement('span'); e.className = 'ch'; e.textContent = ch; return e; });
         say.append(...spans);
+        requestAnimationFrame(() => { const r = say.getBoundingClientRect(), box = frame.getBoundingClientRect(); twinkle(r.left - box.left + 4, r.top - box.top + 2, rnd(14, 22), 0.9); twinkle(r.right - box.left - 4, r.top - box.top + 6, rnd(12, 20), 1.1); });
         if (!first && say.animate) say.animate([{ transform: 'translate(-50%, 0) scale(.9)' }, { transform: 'translate(-50%, 0) scale(1)' }], { duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)' });
       }
       spans.forEach((e, i) => e.classList.toggle('in', i < n - start));
@@ -411,16 +443,36 @@ function ripple(x, y) {
   const r = document.createElement('i'); r.className = 'ripple'; r.style.left = x + 'px'; r.style.top = y + 'px';
   fx.append(r); r.addEventListener('animationend', () => r.remove());
 }
-const HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.400s-7.600-4.600-7.600-10.100A4.300 4.300 0 0 1 12 7.500a4.300 4.300 0 0 1 7.600 2.800c0 5.500-7.600 10.100-7.600 10.100z" fill="#6C85D5" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>';
-function hearts(x, y) {
-  for (let i = 0; i < 3; i++) {
-    const h = document.createElement('i'); h.className = 'heart'; h.innerHTML = HEART;
-    h.style.left = (x + (i - 1) * 16) + 'px'; h.style.top = y + 'px';
-    h.style.setProperty('--dx', ((i - 1) * 26 + Math.random() * 16 - 8) + 'px'); h.style.animationDelay = (i * 0.07) + 's';
-    fx.append(h); h.addEventListener('animationend', () => h.remove());
+const HEARTS = ['#6C85D5', '#89C3EB', '#FFFFFF'].map((fill) => `<svg viewBox="0 0 24 24"><path d="M12 20.400s-7.600-4.600-7.600-10.100A4.300 4.300 0 0 1 12 7.500a4.300 4.300 0 0 1 7.600 2.800c0 5.500-7.600 10.100-7.600 10.100z" fill="${fill}" stroke="${fill === '#FFFFFF' ? '#6C85D5' : '#fff'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`);
+const GLINT = '<svg viewBox="0 0 24 24"><path d="M12 0 13.100 10.900 24 12 13.100 13.100 12 24 10.900 13.100 0 12 10.900 10.900Z" fill="#fff"/><circle cx="12" cy="12" r="2.500" fill="#fff"/></svg>';
+const rnd = (a, b) => a + Math.random() * (b - a);
+const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;   // 動きを減らす設定の端末
+function put(cls, html, css) {
+  const e = document.createElement('i'); e.className = cls; e.innerHTML = html; e.style.cssText = css;
+  fx.append(e); e.addEventListener('animationend', () => e.remove());
+}
+function hearts(x, y, n = 7) {                           // ハートが、大きさと色を変えながら上へ飛ぶ
+  for (let i = 0; i < n; i++) {
+    const size = rnd(15, 32);
+    put('heart', HEARTS[i % HEARTS.length], `left:${x + rnd(-24, 24)}px;top:${y + rnd(-10, 10)}px;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;` +
+      `--dx:${rnd(-70, 70)}px;--dy:${-rnd(70, 150)}px;--rot:${rnd(-28, 28)}deg;animation-delay:${i * 0.05 + rnd(0, 0.08)}s;animation-duration:${rnd(0.9, 1.5)}s`);
   }
 }
-
+function sparkles(x, y, n = 8, spread = 60) {            // キラキラが、押した所から弾けて散る
+  for (let i = 0; i < n; i++) {
+    const a = rnd(0, Math.PI * 2), r = spread * rnd(0.45, 1.2);
+    put('spark', GLINT, `left:${x}px;top:${y}px;--s:${rnd(10, 26)}px;--dx:${Math.cos(a) * r}px;--dy:${Math.sin(a) * r - 10}px;--t:${rnd(0.6, 1.1)}s;--d:${rnd(0, 0.12)}s`);
+  }
+}
+function twinkle(x, y, size = rnd(8, 22), time = rnd(1.3, 2.6)) {   // その場で瞬くキラキラ
+  put('spark twinkle', GLINT, `left:${x}px;top:${y}px;--s:${size}px;--t:${time}s`);
+}
+// 画面のあちこちで、いつも少しずつ瞬かせる。
+if (!calm) setInterval(() => {
+  if (document.hidden || fx.querySelectorAll('.twinkle').length > 13) return;
+  twinkle(rnd(0, frame.clientWidth), rnd(0, frame.clientHeight * 0.94));
+}, 360);
+const SPOT = { cheek: [0.62, 0.315], chest: [0.5, 0.46], head: [0.5, 0.2] };   // 頬・胸元・頭（動画の中の位置、0〜1）
 function videoPoint(u, v) {                             // 動画の中の位置（0〜1）を、枠の中の位置に直す
   const fw = frame.clientWidth, fh = frame.clientHeight, k = Math.max(fw / 720, fh / 1280);   // 動画は枠いっぱいに広げて、はみ出た分を切っている
   return [(fw - 720 * k) * 0.5 + 720 * k * u, (fh - 1280 * k) * 0.3 + 1280 * k * v];
@@ -431,8 +483,8 @@ function poke(x, y) {
   f.style.left = x + 'px'; f.style.top = y + 'px'; f.style.setProperty('--dir', fromLeft ? -1 : 1);
   const b = document.createElement('b'); b.textContent = fromLeft ? '👉' : '👈'; f.append(b);
   fx.append(f); b.addEventListener('animationend', () => f.remove());
-  setTimeout(() => ripple(x, y), 140);                  // 一回目に指が当たる時
-  setTimeout(() => { ripple(x, y); hearts(x, y); }, 410);   // 二回目
+  setTimeout(() => { ripple(x, y); hearts(x, y, 4); sparkles(x, y, 6, 48); }, 140);    // 一回目に指が当たる時
+  setTimeout(() => { ripple(x, y); hearts(x, y, 7); sparkles(x, y, 9, 70); }, 410);    // 二回目
   frame.classList.remove('poked'); void frame.offsetWidth; frame.classList.add('poked');
 }
 
