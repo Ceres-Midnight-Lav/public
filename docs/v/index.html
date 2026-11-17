@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>スマホサイズのV</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#B5D9F2">
+<meta name="theme-color" content="#9297CA">
 <link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -21,7 +21,7 @@
   /* 色は二つ。薄い方が勿忘草色、濃い方が #6C85D5。字は丸ゴシック一つ。
      押す物と吹き出しは、角を無くして、上からの光・下の色づき・落ちる影で厚みを付ける（柔らかい硝子の粒）。 */
   :root {
-    --backdrop-top:#B5D9F2; --backdrop-bottom:#EFF7FC;
+    --backdrop-top:#9297CA; --backdrop-bottom:#9F9CD2;   /* 動画が届く前に見える地の色（背景の絵の上と下の色） */
     --wasurenagusa:#89C3EB; --royal:#6C85D5;
     --shade: 72,92,170;                                   /* 影の色（#6C85D5 を少し深くした青） */
     --ui:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
@@ -209,7 +209,11 @@
   #voices button::before { content: "▶"; font-size: 10px; margin-right: 10px; vertical-align: 2px; opacity: .8; }
   #voices p { background: rgba(137,195,235,.16); font-size: 13px; font-weight: 500; line-height: 1.6; opacity: .82; }
 
-  :is(#acts button, #count, #close, #voices button):focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
+  /* 作者（一覧の一番下） */
+  #author { margin: 16px 0 4px; text-align: center; font-size: 12.5px; font-weight: 700; letter-spacing: .05em; }
+  #author a { color: inherit; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; padding: 6px 2px; }
+
+  :is(#acts button, #count, #close, #voices button, #author a):focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) {
     .ripple, .heart, .spark, #count.bump, #panel { animation-duration: .01s !important; }
     .finger b { animation-duration: .5s; }
@@ -243,6 +247,7 @@
         <button id="close" type="button">閉じる</button>
       </header>
       <ol id="voices"></ol>
+      <p id="author">作者 <a href="https://x.com/opus45sonnet45" target="_blank" rel="noopener">@opus45sonnet45</a></p>
     </div>
   </div>
 </main>
@@ -472,7 +477,7 @@ if (!calm) setInterval(() => {
   if (document.hidden || fx.querySelectorAll('.twinkle').length > 13) return;
   twinkle(rnd(0, frame.clientWidth), rnd(0, frame.clientHeight * 0.94));
 }, 360);
-const SPOT = { cheek: [0.62, 0.315], chest: [0.5, 0.46], head: [0.5, 0.2] };   // 頬・胸元・頭（動画の中の位置、0〜1）
+const SPOT = { cheek: [0.60, 0.32], chest: [0.5, 0.43], head: [0.5, 0.21] };   // 頬・胸元・頭（動画の中の位置、0〜1）
 function videoPoint(u, v) {                             // 動画の中の位置（0〜1）を、枠の中の位置に直す
   const fw = frame.clientWidth, fh = frame.clientHeight, k = Math.max(fw / 720, fh / 1280);   // 動画は枠いっぱいに広げて、はみ出た分を切っている
   return [(fw - 720 * k) * 0.5 + 720 * k * u, (fh - 1280 * k) * 0.3 + 1280 * k * v];
