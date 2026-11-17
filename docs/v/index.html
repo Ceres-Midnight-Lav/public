@@ -8,18 +8,31 @@
 <meta name="theme-color" content="#B5D9F2">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&amp;family=Zen+Old+Mincho:wght@700&amp;display=swap">
 <style>
-  /* 色は二つ。薄い方が勿忘草色（その淡い側を背景に使う）、濃い方が #6C85D5。 */
-  :root { --backdrop-top:#B5D9F2; --backdrop-bottom:#EFF7FC; --royal:#6C85D5; }
+  /* 色は二つ。薄い方が勿忘草色（その淡い側を背景に使う）、濃い方が #6C85D5。
+     字は二つ。押す物は丸ゴシック、Vの台詞は明朝。 */
+  :root {
+    --backdrop-top:#B5D9F2; --backdrop-bottom:#EFF7FC;
+    --wasurenagusa:#89C3EB; --royal:#6C85D5; --line:rgba(108,133,213,.36);
+    --ui:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
+    --voice:"Zen Old Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  }
+  * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-    background: var(--royal);
+    background: var(--royal); color: var(--royal); font-family: var(--ui);
     display: grid; place-items: center; overflow: hidden;
     -webkit-tap-highlight-color: transparent;
   }
+  button { font: inherit; color: inherit; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
   /* スマホ1台ぶんの縦長の枠。スマホでは画面いっぱい、広い画面では中央に1台ぶん。 */
   #frame {
-    position: relative; overflow: hidden;
+    position: relative; overflow: hidden; cursor: pointer;
     height: 100vh; height: 100dvh;
     width: min(100vw, calc(100vh * 9 / 16)); width: min(100vw, calc(100dvh * 9 / 16));
     background: linear-gradient(var(--backdrop-top), var(--backdrop-bottom));
@@ -30,48 +43,154 @@
     object-fit: cover; object-position: 50% 30%; display: block; pointer-events: none;
   }
   #talk { opacity: 0; transition: opacity .18s linear; }
+  #frame.poked video { animation: nudge .3s ease-out; }
+  @keyframes nudge { 35% { transform: scale(1.02) translateY(-3px); } }
   #talk.on { opacity: 1; }
-  /* 喋りの動画がある時だけ出す案内。 */
-  #hint {
-    position: absolute; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    margin: 0; padding: 9px 16px; border-radius: 999px; white-space: nowrap;
-    background: rgba(255,255,255,.92); color: var(--royal);
-    font: 500 14px/1.2 "Hiragino Maru Gothic ProN", "Zen Maru Gothic", "Yu Gothic", system-ui, sans-serif; letter-spacing: .04em;
-    opacity: 0; transition: opacity .3s linear; pointer-events: none;
+
+  /* 押した所に出る手応え */
+  #fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .ripple {
+    position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+    border: 2px solid #fff; background: rgba(137,195,235,.4);
+    animation: ripple .6s ease-out forwards;
   }
-  #frame.can-talk:not(.spoke) #hint { opacity: 1; }
+  @keyframes ripple { from { transform: scale(.6); opacity: .95; } to { transform: scale(7); opacity: 0; } }
+  .heart { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; opacity: 0; animation: heart 1s ease-out forwards; }
+  .heart svg { display: block; width: 100%; height: 100%; }
+  @keyframes heart {
+    from { transform: translate(0, 0) scale(.5); opacity: 1; }
+    to { transform: translate(var(--dx), -88px) scale(1.15); opacity: 0; }
+  }
+
+  /* 聞いたボイスの数（右上） */
+  #count {
+    position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px;
+    padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--line);
+    background: rgba(255,255,255,.95); cursor: pointer;
+    font-size: 13px; font-weight: 700; letter-spacing: .04em; font-variant-numeric: tabular-nums;
+  }
+  #count.bump { animation: bump .55s ease; }
+  @keyframes bump { 35% { transform: scale(1.16); background: var(--wasurenagusa); color: #fff; } }
+
+  /* Vの台詞（吹き出し）。しっぽは上、Vの口の方を向く。 */
+  #say {
+    position: absolute; left: 16px; right: 16px; bottom: calc(112px + env(safe-area-inset-bottom));
+    margin: 0; padding: 13px 18px 14px; border-radius: 18px; border: 1.5px solid var(--line);
+    background: rgba(255,255,255,.96);
+    font-family: var(--voice); font-weight: 700; font-size: 18px; line-height: 1.7; letter-spacing: .03em;
+    opacity: 0; transform: translateY(6px); transition: opacity .2s linear, transform .2s ease; pointer-events: none;
+  }
+  #say.on { opacity: 1; transform: none; }
+  #say::before {
+    content: ""; position: absolute; left: 50%; top: -9px; width: 16px; height: 16px; margin-left: -8px;
+    background: #fff; border-left: 1.5px solid var(--line); border-top: 1.5px solid var(--line);
+    transform: rotate(45deg); border-radius: 3px 0 0 0;
+  }
+  #say .rest { visibility: hidden; }
+
+  /* 最初だけ出す断り書き */
+  #note {
+    position: absolute; left: 50%; bottom: calc(112px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    margin: 0; padding: 8px 14px; border-radius: 999px; white-space: nowrap;
+    background: rgba(255,255,255,.92); font-size: 13px; font-weight: 700; letter-spacing: .04em;
+    transition: opacity .3s linear; pointer-events: none;
+  }
+  #frame.acted #note { opacity: 0; }
+
+  /* 押す物（下） */
+  #acts {
+    position: absolute; left: 0; right: 0; bottom: calc(20px + env(safe-area-inset-bottom));
+    display: flex; justify-content: center; gap: 22px;
+  }
+  #acts button {
+    width: 72px; height: 72px; padding: 0; border-radius: 50%; border: 1.5px solid var(--line);
+    background: rgba(255,255,255,.96); box-shadow: 0 6px 16px rgba(108,133,213,.3); cursor: pointer;
+    display: grid; place-content: center; justify-items: center; gap: 3px;
+    transition: transform .12s ease, background-color .15s linear, color .15s linear, opacity .2s linear;
+  }
+  #acts button svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  #acts button span { font-size: 11px; font-weight: 700; letter-spacing: .04em; line-height: 1; }
+  #acts button:active { transform: scale(.92); }
+  #acts button[disabled] { opacity: .45; cursor: default; box-shadow: none; }
+  #acts button.speaking { opacity: 1; background: var(--royal); border-color: var(--royal); color: #fff; }
+
+  /* ボイスの一覧（下から出る） */
+  #sheet { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-end; background: rgba(108,133,213,.4); cursor: default; }
+  #sheet[hidden] { display: none; }
+  #panel {
+    width: 100%; max-height: 82%; overflow: auto; -webkit-overflow-scrolling: touch;
+    background: #fff; border-radius: 22px 22px 0 0; padding: 16px 20px calc(18px + env(safe-area-inset-bottom));
+  }
+  #panel header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  #panel h2 { margin: 0; font-family: var(--voice); font-weight: 700; font-size: 20px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  #close { border: 0; background: none; padding: 10px 2px 10px 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  #voices { list-style: none; margin: 0; padding: 0; }
+  #voices li { border-top: 1px solid var(--line); }
+  #voices button, #voices p { display: block; width: 100%; margin: 0; padding: 13px 2px; border: 0; background: none; text-align: left; }
+  #voices button { font-family: var(--voice); font-weight: 700; font-size: 16px; line-height: 1.7; letter-spacing: .02em; cursor: pointer; }
+  #voices button::before { content: "▶"; font-family: var(--ui); font-size: 11px; margin-right: 10px; vertical-align: 2px; }
+  #voices p { font-size: 13.5px; font-weight: 500; line-height: 1.6; opacity: .75; }
+
+  :is(#acts button, #count, #close, #voices button):focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    .ripple, .heart, #count.bump { animation-duration: .01s; }
+    #frame.poked video { animation: none; }
+    #say, #acts button, #talk { transition: none; }
+  }
 </style>
 </head>
 <body>
 <main id="frame" aria-label="スマホサイズのV">
   <video id="idle" poster="idle.jpg?v=5b412ea9" muted autoplay loop playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
   <video id="talk" playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
-  <p id="hint">タップで声が出ます</p>
+  <div id="fx" aria-hidden="true"></div>
+
+  <button id="count" type="button" aria-label="ボイスの一覧を開く">ボイス <span id="count-n">0</span>/<span id="count-all">0</span></button>
+
+  <p id="say" aria-hidden="true"></p>
+  <p id="live" class="sr" aria-live="polite"></p>
+  <p id="note">押すと声が出ます</p>
+
+  <div id="acts">
+    <button type="button" data-act="greet" disabled><svg viewBox="0 0 24 24" aria-hidden="true"></svg><span>あいさつ</span></button>
+    <button type="button" data-act="call" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.6A2.6 2.6 0 0 1 6.6 4h10.8A2.6 2.6 0 0 1 20 6.6v6.8a2.6 2.6 0 0 1-2.6 2.600H11.200L7 19.600V16H6.600A2.6 2.6 0 0 1 4 13.400z"/></svg><span>呼ぶ</span></button>
+    <button type="button" data-act="poke" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="6.6"/><path d="M12 1.800v2M12 20.200v2M1.800 12h2M20.200 12h2"/></svg><span>つつく</span></button>
+  </div>
+
+  <div id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div id="panel">
+      <header>
+        <h2 id="sheet-title">ボイス <span id="sheet-n">0</span>/<span id="sheet-all">0</span></h2>
+        <button id="close" type="button">閉じる</button>
+      </header>
+      <ol id="voices"></ol>
+    </div>
+  </div>
 </main>
 <script>
-// 入り口。開くと、立って、まばたきして、揺れている。押すと、声で喋る。
+// 入り口。開くと、立って、まばたきして、揺れている。「あいさつ」「呼ぶ」「つつく」を押すと、声で返す。
 // 体は動画にしてある（3Dの体のデータは、このページのどこにも置いていない）。
 const LOOP = 8;          // 待機の動画の1周（秒）
-// 喋りの動画。src＝ファイル、dur＝長さ（秒）、role＝使い所。
-//   greet-morning / greet-day / greet-night … 最初に押された時の挨拶（開いた人の時刻で一つ選ぶ）
-//   tap … 二回目からの一言（順番を入れ替えながら一巡する）
-//   closer … 一言を全部出し終えた後の締め
+// 喋りの動画。name＝名前、src＝ファイル、dur＝長さ（秒）、text＝台詞、prog＝声の進み具合（0.1秒ごと、0〜1）、role＝使い所。
+//   greet-morning / greet-day / greet-night … 「あいさつ」（開いた人の時刻の物を使う）
+//   call … 「呼ぶ」　poke … 「つつく」（体を直接押した時も）
+//   closer … 今聞けるボイスを全部聞いた後に出る締め
 const CLIPS = [
-  { src: 'talk-ohayou.mp4?v=892efd30', dur: 5.3667, role: 'greet-morning' },   // 「おはよう。今日も頑張ってね。いってらっしゃい。」
-  { src: 'talk-okaeri.mp4?v=0f1c9901', dur: 4.6333, role: 'greet-day' },   // 「おかえり。君のこと、ずっと待ってたよ。」
-  { src: 'talk-oyasumi.mp4?v=bba4497a', dur: 4.8, role: 'greet-night' },   // 「おやすみなさい。夢の中でも一緒だよ。」
-  { src: 'talk-moshimoshi.mp4?v=e16524e6', dur: 3.6, role: 'tap' },   // 「もしもーし。聴こえてますかぁ？」
-  { src: 'talk-fue.mp4?v=54008b24', dur: 7.1333, role: 'tap' },   // 「ふぇ！？びっくりした……ちゃんと、聴こえてる………かな？」
-  { src: 'talk-kyuu.mp4?v=074b0364', dur: 10.7667, role: 'tap' },   // 「きゅ、急に来られたらビックリするじゃない！で、でも、来てくれてありがとう。……嬉しいよ。」
-  { src: 'talk-sonnani.mp4?v=f4a910a8', dur: 9.8333, role: 'tap' },   // 「そんなに押して……暇なの？……じゃあ、もう少し一緒にいてあげる。」
-  { src: 'talk-tsutsukanaide.mp4?v=719a5da9', dur: 8.1667, role: 'tap' },   // 「ちょ、ちょっと！つつかないで！……待って。もう一回。」
-  { src: 'talk-ijou.mp4?v=8ddaea8c', dur: 2.5, role: 'closer' },   // 「以上っ！テストでした！」
+  {"name":"ohayou","src":"talk-ohayou.mp4?v=892efd30","dur":5.3667,"role":"greet-morning","text":"おはよう。今日も頑張ってね。いってらっしゃい。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.25,0.29,0.33,0.37,0.39,0.39,0.43,0.46,0.5,0.53,0.53,0.56,0.58,0.62,0.66,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.7,0.7,0.73,0.76,0.8,0.84,0.88,0.92,0.96,0.99,1,1,1,1,1]},
+  {"name":"okaeri","src":"talk-okaeri.mp4?v=0f1c9901","dur":4.6333,"role":"greet-day","text":"おかえり。君のこと、ずっと待ってたよ。","prog":[0,0.03,0.04,0.08,0.13,0.17,0.21,0.25,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.29,0.33,0.37,0.42,0.44,0.45,0.49,0.53,0.57,0.59,0.59,0.59,0.59,0.6,0.64,0.64,0.68,0.72,0.76,0.76,0.8,0.82,0.86,0.9,0.94,0.99,1,1,1,1,1,1]},
+  {"name":"oyasumi","src":"talk-oyasumi.mp4?v=bba4497a","dur":4.8,"role":"greet-night","text":"おやすみなさい。夢の中でも一緒だよ。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.24,0.28,0.32,0.35,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.4,0.44,0.47,0.51,0.55,0.57,0.59,0.62,0.66,0.7,0.73,0.76,0.76,0.76,0.76,0.76,0.79,0.82,0.85,0.88,0.92,0.96,0.99,1,1,1,1,1,1]},
+  {"name":"moshimoshi","src":"talk-moshimoshi.mp4?v=e16524e6","dur":3.6,"role":"call","text":"もしもーし。聴こえてますかぁ？","prog":[0.01,0.05,0.09,0.14,0.18,0.22,0.26,0.3,0.34,0.38,0.42,0.43,0.43,0.43,0.43,0.45,0.47,0.48,0.51,0.55,0.59,0.64,0.68,0.72,0.75,0.78,0.82,0.86,0.9,0.94,0.97,1,1,1,1,1,1]},
+  {"name":"fue","src":"talk-fue.mp4?v=54008b24","dur":7.1333,"role":"call","text":"ふぇ！？びっくりした……ちゃんと、聴こえてる………かな？","prog":[0.02,0.05,0.08,0.11,0.14,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.2,0.22,0.22,0.24,0.27,0.3,0.3,0.33,0.36,0.39,0.42,0.45,0.47,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.53,0.56,0.57,0.6,0.62,0.62,0.62,0.62,0.62,0.65,0.68,0.71,0.72,0.75,0.78,0.81,0.82,0.82,0.82,0.82,0.82,0.83,0.86,0.89,0.92,0.95,0.97,0.98,1,1,1,1,1,1]},
+  {"name":"kyuu","src":"talk-kyuu.mp4?v=074b0364","dur":10.7667,"role":"poke","text":"きゅ、急に来られたらビックリするじゃない！で、でも、来てくれてありがとう。……嬉しいよ。","prog":[0,0.01,0.03,0.03,0.03,0.03,0.05,0.07,0.09,0.11,0.12,0.13,0.15,0.17,0.19,0.2,0.22,0.24,0.25,0.25,0.25,0.27,0.28,0.29,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.49,0.49,0.49,0.49,0.49,0.49,0.51,0.53,0.55,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.58,0.59,0.6,0.62,0.64,0.66,0.68,0.68,0.68,0.68,0.68,0.68,0.69,0.71,0.73,0.75,0.76,0.77,0.79,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.84,0.86,0.88,0.9,0.92,0.93,0.94,0.96,0.98,1,1,1,1,1,1]},
+  {"name":"sonnani","src":"talk-sonnani.mp4?v=f4a910a8","dur":9.8333,"role":"poke","text":"そんなに押して……暇なの？……じゃあ、もう少し一緒にいてあげる。","prog":[0,0,0,0,0.01,0.02,0.04,0.07,0.09,0.12,0.14,0.17,0.17,0.19,0.21,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.24,0.26,0.28,0.31,0.33,0.35,0.38,0.4,0.43,0.44,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.46,0.48,0.5,0.52,0.54,0.54,0.54,0.54,0.55,0.57,0.6,0.62,0.65,0.67,0.69,0.71,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.75,0.77,0.8,0.82,0.85,0.86,0.88,0.91,0.93,0.96,0.98,1,1,1,1,1,1]},
+  {"name":"tsutsukanaide","src":"talk-tsutsukanaide.mp4?v=719a5da9","dur":8.1667,"role":"poke","text":"ちょ、ちょっと！つつかないで！……待って。もう一回。","prog":[0,0.02,0.04,0.04,0.04,0.04,0.04,0.08,0.08,0.08,0.1,0.14,0.17,0.18,0.18,0.18,0.18,0.18,0.18,0.2,0.22,0.24,0.27,0.3,0.34,0.36,0.39,0.43,0.46,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.5,0.54,0.55,0.56,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.6,0.64,0.65,0.66,0.69,0.73,0.76,0.77,0.78,0.78,0.78,0.78,0.78,0.79,0.82,0.86,0.89,0.9,0.9,0.93,0.97,0.99,1,1,1,1,1,1]},
+  {"name":"ijou","src":"talk-ijou.mp4?v=8ddaea8c","dur":2.5,"role":"closer","text":"以上っ！テストでした！","prog":[0,0.07,0.14,0.19,0.29,0.4,0.4,0.4,0.4,0.4,0.47,0.57,0.59,0.6,0.67,0.72,0.78,0.78,0.78,0.84,0.95,1,1,1,1,1]}
 ];
 const IDLE = 'idle.mp4?v=3f99dcf6';   // 待機の動画
 
-const frame = document.getElementById('frame');
-const idle = document.getElementById('idle');
-const talk = document.getElementById('talk');
+const $ = (id) => document.getElementById(id);
+const frame = $('frame'), idle = $('idle'), talk = $('talk'), fx = $('fx'), say = $('say'), sheet = $('sheet');
+const buttons = Object.fromEntries([...document.querySelectorAll('#acts button')].map((b) => [b.dataset.act, b]));
 
 // 動画は丸ごと受け取ってから流す。同じサイトの別ページが置いている保存の仕組み（Service Worker）を
 // 通っても、通らなくても、同じ動きになる受け取り方。
@@ -80,57 +199,101 @@ const play = (v) => { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
 
 (async () => {
   try { idle.src = await fetchUrl(IDLE); } catch { return; }   // 受け取れない時は、止まった絵のまま
-  play(idle);                                                        // 自動で流れない設定の端末では、最初のタップで流れる
+  play(idle);                                                  // 自動で流れない設定の端末では、最初に押した時に流れる
 })();
 
+/* ───────── 台詞の振り分け ───────── */
 // 朝（4時〜10時台）は「おはよう」、昼から夜（11時〜21時台）は「おかえり」、夜更け（22時〜3時台）は「おやすみなさい」。
 const partOfDay = (h = new Date().getHours()) => (h >= 4 && h < 11 ? 'morning' : h >= 11 && h < 22 ? 'day' : 'night');
-const taps = CLIPS.filter((c) => c.role === 'tap');
-const closer = CLIPS.find((c) => c.role === 'closer');
-let greeted = false, queue = [], closerDue = false, last = null;
-function upcoming() {                                   // 次に喋る台詞を決める
-  if (!greeted) { greeted = true; const g = CLIPS.find((c) => c.role === 'greet-' + partOfDay()); if (g) return g; }
-  if (!queue.length) {
-    if (closerDue && closer) { closerDue = false; return closer; }
-    queue = taps.slice();
-    for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
-    if (queue.length > 1 && queue[0] === last) queue.push(queue.shift());   // 続けて同じ台詞にしない
-    closerDue = queue.length > 0;
+const NOW = partOfDay();
+const pools = {
+  greet: CLIPS.filter((c) => c.role === 'greet-' + NOW),
+  call: CLIPS.filter((c) => c.role === 'call'),
+  poke: CLIPS.filter((c) => c.role === 'poke'),
+};
+const closer = CLIPS.find((c) => c.role === 'closer') || null;
+const available = [...pools.greet, ...pools.call, ...pools.poke];      // 今の時刻で聞ける台詞
+buttons.greet.querySelector('svg').innerHTML = {
+  morning: '<circle cx="12" cy="12" r="4"/><path d="M12 2.500v2.300M12 19.200v2.300M2.500 12h2.300M19.200 12h2.300M5.300 5.300l1.600 1.600M17.100 17.100l1.600 1.600M5.300 18.700l1.600-1.600M17.100 6.900l1.600-1.600"/>',
+  day: '<path d="M3.500 11.200 12 4l8.500 7.200"/><path d="M6 9.400V19.500h12V9.400"/><path d="M10 19.500v-5h4v5"/>',
+  night: '<path d="M19.600 14.300A8 8 0 0 1 9.700 4.400a8 8 0 1 0 9.900 9.900z"/>',
+}[NOW];
+
+// 聞いたボイスは、この端末に覚えておく（覚えられない設定の時は、開いている間だけ）。
+const KEY = 'sumaho-v:heard';
+const heard = new Set();
+try { for (const n of JSON.parse(localStorage.getItem(KEY) || '[]')) if (CLIPS.some((c) => c.name === n)) heard.add(n); } catch { /* 覚えを読めない時は、0から */ }
+const remember = () => { try { localStorage.setItem(KEY, JSON.stringify([...heard])); } catch { /* 覚えられない時は、そのまま */ } };
+const closerDue = () => Boolean(closer) && !heard.has(closer.name) && available.length > 0 && available.every((c) => heard.has(c.name));
+function showCount(bump) {
+  for (const id of ['count-n', 'sheet-n']) $(id).textContent = heard.size;
+  for (const id of ['count-all', 'sheet-all']) $(id).textContent = CLIPS.length;
+  if (bump) { $('count').classList.remove('bump'); void $('count').offsetWidth; $('count').classList.add('bump'); }
+}
+showCount(false);
+
+// 次に返す台詞：まだ聞いていない物を先に。続けて同じ台詞にしない。
+const lastOf = {};
+function choose(act) {
+  const pool = pools[act];
+  if (!pool.length) return null;
+  const others = pool.filter((c) => c !== lastOf[act]);
+  const fresh = others.filter((c) => !heard.has(c.name));
+  const from = fresh.length ? fresh : others.length ? others : pool;
+  return from[Math.floor(Math.random() * from.length)];
+}
+
+// 台詞は、押す物ごとに次の一つだけ前もって受け取っておく（全部を先に受け取ると、開いた人の通信量が大きくなる）。
+const got = new Map();                                  // 受け取り済み（名前 → 動画）
+const ready = {}, loading = {};
+const load = (c) => (got.has(c.name) ? Promise.resolve() : fetchUrl(c.src).then((url) => { got.set(c.name, url); }));
+function prepare(act) {
+  const c = choose(act);
+  ready[act] = null; loading[act] = c; refresh();
+  if (!c) return Promise.resolve();
+  return load(c).then(() => { if (loading[act] === c) { loading[act] = null; ready[act] = c; refresh(); } },
+                      () => { if (loading[act] === c) { loading[act] = null; setTimeout(() => prepare(act), 4000); } });   // 受け取れなかった時は、少し置いて取り直す
+}
+
+/* ───────── 押した時 ───────── */
+let busy = false, current = null, speakingAct = null;
+function refresh() {
+  for (const [act, b] of Object.entries(buttons)) {
+    b.disabled = busy || !ready[act];
+    b.classList.toggle('speaking', busy && speakingAct === act);
   }
-  return (last = queue.shift()) || null;
 }
-
-// 次の台詞は、前もって一つだけ受け取っておく（全部を先に受け取ると、開いた人の通信量が大きくなる）。
-let next = null, pending = null;
-const got = new Map();                                  // 受け取り済みの台詞（二巡目からは受け取り直さない）
-function prepare(c) {
-  next = null; pending = c;
-  if (!c) return;
-  const ready = (url) => { if (pending !== c) return; pending = null; next = { ...c, url }; frame.classList.add('can-talk'); };
-  if (got.has(c.src)) { ready(got.get(c.src)); return; }
-  fetchUrl(c.src).then((url) => { got.set(c.src, url); ready(url); },
-                       () => { if (pending === c) pending = null; });   // 受け取れなかった時は、次に押された時に別の台詞を取りに行く
-}
-prepare(upcoming());
-
-let busy = false, current = null;
-function finish() {
-  if (!busy) return;
-  busy = false;
-  if (!document.hidden) play(idle);
-  talk.classList.remove('on');
-}
-frame.addEventListener('click', () => {
+function act(name, x, y) {
+  ripple(x, y);
   if (!busy && idle.paused && idle.src) play(idle);
   if (busy) return;
-  if (!next) { if (!pending) prepare(upcoming()); return; }
-  current = next; busy = true;
-  frame.classList.add('spoke'); frame.dataset.line = current.src;
-  talk.src = current.url; talk.muted = false;
+  const c = closerDue() && got.has(closer.name) ? closer : ready[name];
+  if (!c) return;
+  if (name === 'poke') { hearts(x, y); frame.classList.remove('poked'); void frame.offsetWidth; frame.classList.add('poked'); }
+  speak(c, name);
+  if (c !== closer) prepare(name);                      // 喋っている間に、次の台詞を受け取っておく
+}
+function speak(c, name) {
+  current = c; busy = true; speakingAct = name; lastOf[name] = c;
+  frame.classList.add('acted'); frame.dataset.line = c.name;
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch { /* 震えない端末 */ } }
+  refresh();
+  talk.src = got.get(c.name); talk.muted = false;
   const p = talk.play();
   if (p && p.catch) p.catch(finish);
-  prepare(upcoming());                                  // 喋っている間に、次の台詞を受け取っておく
-});
+  showLine(c);
+}
+function finish() {
+  if (!busy) return;
+  const whole = talk.ended;                             // 最後まで聞いた時だけ「聞いた」に数える
+  busy = false; speakingAct = null;
+  if (!document.hidden) play(idle);
+  talk.classList.remove('on');
+  if (whole && current && !heard.has(current.name)) { heard.add(current.name); remember(); showCount(true); }
+  lineTimer = setTimeout(() => say.classList.remove('on'), 2200);
+  refresh();
+  if (closerDue() && !got.has(closer.name)) load(closer).catch(() => {});
+}
 talk.addEventListener('playing', () => {
   talk.classList.add('on');
   // 喋り終わりの姿勢は、待機の同じ時刻の姿勢と揃えてある。喋っている間に、待機をその時刻で待たせておく。
@@ -144,6 +307,92 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) { if (busy) talk.pause(); return; }
   if (!busy && idle.src) play(idle);
 });
+
+// 台詞を、声の進み具合に合わせて一文字ずつ出す。
+let lineTimer = 0, raf = 0;
+function showLine(c) {
+  clearTimeout(lineTimer); cancelAnimationFrame(raf);
+  const chars = [...c.text], prog = c.prog || [];
+  const shown = document.createElement('span'), rest = document.createElement('span');
+  rest.className = 'rest'; say.textContent = ''; say.append(shown, rest);
+  $('live').textContent = c.text;
+  const at = (t) => {
+    if (!prog.length) return Math.min(1, t / Math.max(0.1, c.dur - 0.4));
+    const x = Math.max(0, Math.min(prog.length - 1, t * 10)), i = Math.floor(x), j = Math.min(prog.length - 1, i + 1);
+    return prog[i] + (prog[j] - prog[i]) * (x - i);
+  };
+  let last = -1;
+  const tick = () => {
+    const speaking = busy && current === c;
+    const n = speaking ? Math.round(chars.length * at(talk.currentTime || 0)) : chars.length;
+    if (n !== last) { last = n; shown.textContent = chars.slice(0, n).join(''); rest.textContent = chars.slice(n).join(''); }
+    if (n > 0) say.classList.add('on');                 // 最初の一文字が出る時に、吹き出しを出す
+    if (speaking) raf = requestAnimationFrame(tick);
+  };
+  say.classList.remove('on'); tick();
+}
+
+// 押した所の手応え：波紋。つついた時はハートも。
+function ripple(x, y) {
+  const r = document.createElement('i'); r.className = 'ripple'; r.style.left = x + 'px'; r.style.top = y + 'px';
+  fx.append(r); r.addEventListener('animationend', () => r.remove());
+}
+const HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.400s-7.600-4.600-7.600-10.100A4.300 4.300 0 0 1 12 7.500a4.300 4.300 0 0 1 7.600 2.800c0 5.500-7.600 10.100-7.600 10.100z" fill="#6C85D5" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+function hearts(x, y) {
+  for (let i = 0; i < 3; i++) {
+    const h = document.createElement('i'); h.className = 'heart'; h.innerHTML = HEART;
+    h.style.left = (x + (i - 1) * 16) + 'px'; h.style.top = y + 'px';
+    h.style.setProperty('--dx', ((i - 1) * 26 + Math.random() * 16 - 8) + 'px'); h.style.animationDelay = (i * 0.07) + 's';
+    fx.append(h); h.addEventListener('animationend', () => h.remove());
+  }
+}
+
+frame.addEventListener('click', (e) => {
+  if (e.target.closest('#sheet') || e.target.closest('#count')) return;
+  const b = e.target.closest('#acts button'), box = frame.getBoundingClientRect();
+  let x = e.clientX - box.left, y = e.clientY - box.top;
+  if (b && e.detail === 0) { const r = b.getBoundingClientRect(); x = r.left + r.width / 2 - box.left; y = r.top + r.height / 2 - box.top; }   // キーボードで押した時は、ボタンの真ん中から
+  act(b ? b.dataset.act : 'poke', x, y);                // 体を直接押した時は「つつく」
+});
+
+/* ───────── ボイスの一覧 ───────── */
+const HINT = {
+  'greet-morning': '朝（4時〜10時台）に「あいさつ」すると聞ける',
+  'greet-day': '昼から夜（11時〜21時台）に「あいさつ」すると聞ける',
+  'greet-night': '夜更け（22時〜3時台）に「あいさつ」すると聞ける',
+  call: '「呼ぶ」と聞ける', poke: '「つつく」と聞ける', closer: '今聞けるボイスを全部聞くと出る',
+};
+function openList() {
+  const list = $('voices'); list.textContent = '';
+  for (const c of CLIPS) {
+    const li = document.createElement('li');
+    if (heard.has(c.name)) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = c.text;
+      b.addEventListener('click', () => replay(c)); li.append(b);
+    } else {
+      const p = document.createElement('p'); p.textContent = 'まだ聞いていない：' + (HINT[c.role] || ''); li.append(p);
+    }
+    list.append(li);
+  }
+  showCount(false); sheet.hidden = false; $('close').focus();
+}
+function closeList() { sheet.hidden = true; }
+function replay(c) {                                     // 聞いた台詞を、もう一度
+  closeList();
+  if (busy) return;
+  const name = c.role.startsWith('greet') ? 'greet' : c.role === 'closer' ? '' : c.role;
+  load(c).then(() => { if (!busy) speak(c, name); }, () => {});
+}
+$('count').addEventListener('click', openList);
+$('close').addEventListener('click', () => { closeList(); $('count').focus(); });
+sheet.addEventListener('click', (e) => { if (e.target === sheet) closeList(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !sheet.hidden) { closeList(); $('count').focus(); } });
+
+// 始め：あいさつ → つつく → 呼ぶ の順に、最初の台詞を一つずつ受け取る。
+(async () => {
+  for (const name of ['greet', 'poke', 'call']) await prepare(name);
+  if (closerDue()) load(closer).catch(() => {});
+})();
 </script>
 </body>
 </html>
