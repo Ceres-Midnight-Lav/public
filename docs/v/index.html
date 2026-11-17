@@ -6,8 +6,14 @@
 <title>スマホサイズのV</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#B5D9F2">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="64x64" href="icon-64.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="スマホのV">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&amp;family=Zen+Old+Mincho:wght@700&amp;display=swap">
@@ -30,21 +36,22 @@
   button { font: inherit; color: inherit; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-  /* スマホ1台ぶんの縦長の枠。スマホでは画面いっぱい、広い画面では中央に1台ぶん。 */
+  /* 枠。スマホでは、画面がどんな縦横比でも横いっぱいに広げる（体の動画は、はみ出た上下を切る）。
+     横に広い画面（タブレットの横置き・パソコン）だけ、中央にスマホ1台ぶんの幅で置く。 */
   #frame {
     position: relative; overflow: hidden; cursor: pointer;
-    height: 100vh; height: 100dvh;
-    width: min(100vw, calc(100vh * 9 / 16)); width: min(100vw, calc(100dvh * 9 / 16));
+    width: 100vw; height: 100vh; height: 100dvh;
     background: linear-gradient(var(--backdrop-top), var(--backdrop-bottom));
     touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
+  @media (min-aspect-ratio: 3/4) { #frame { width: calc(100vh * 9 / 16); width: calc(100dvh * 9 / 16); } }
   #frame video {
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover; object-position: 50% 30%; display: block; pointer-events: none;
   }
   #talk { opacity: 0; transition: opacity .18s linear; }
-  #frame.poked video { animation: nudge .3s ease-out; }
-  @keyframes nudge { 35% { transform: scale(1.02) translateY(-3px); } }
+  #frame.poked video { animation: nudge .8s ease-out; }
+  @keyframes nudge { 0%, 12%, 36%, 46%, 70%, 100% { transform: none; } 22% { transform: scale(1.02) translateY(-3px); } 56% { transform: scale(1.016) translateY(-2px); } }
   #talk.on { opacity: 1; }
 
   /* 押した所に出る手応え */
@@ -62,6 +69,23 @@
     to { transform: translate(var(--dx), -88px) scale(1.15); opacity: 0; }
   }
 
+  /* つつく指。指先が、押した所に来る。右から二回突いて、引っ込む（右端に近い所では、左から）。 */
+  .finger { position: absolute; transform: translate(2px, -46%); pointer-events: none; }
+  .finger.left { transform: translate(calc(-100% - 2px), -46%); }
+  .finger b {
+    display: block; font-size: 46px; line-height: 1; font-weight: 400; opacity: 0;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    animation: jab .8s ease-out forwards;
+  }
+  @keyframes jab {
+    0% { transform: translateX(calc(var(--dir) * 60px)); opacity: 0; }
+    18% { transform: translateX(0); opacity: 1; }
+    34% { transform: translateX(calc(var(--dir) * 18px)); opacity: 1; }
+    52% { transform: translateX(0); opacity: 1; }
+    72% { transform: translateX(calc(var(--dir) * 10px)); opacity: 1; }
+    100% { transform: translateX(calc(var(--dir) * 64px)); opacity: 0; }
+  }
+
   /* 聞いたボイスの数（右上） */
   #count {
     position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 14px;
@@ -72,17 +96,19 @@
   #count.bump { animation: bump .55s ease; }
   @keyframes bump { 35% { transform: scale(1.16); background: var(--wasurenagusa); color: #fff; } }
 
-  /* Vの台詞（吹き出し）。しっぽは上、Vの口の方を向く。 */
+  /* Vの台詞（吹き出し）。一区切りずつ出す。喋っている間は押す物が下がって、吹き出しが一番下に来る（体に掛からない）。
+     しっぽは上、Vの口の方を向く。 */
   #say {
-    position: absolute; left: 16px; right: 16px; bottom: calc(112px + env(safe-area-inset-bottom));
-    margin: 0; padding: 13px 18px 14px; border-radius: 18px; border: 1.5px solid var(--line);
-    background: rgba(255,255,255,.96);
-    font-family: var(--voice); font-weight: 700; font-size: 18px; line-height: 1.7; letter-spacing: .03em;
-    opacity: 0; transform: translateY(6px); transition: opacity .2s linear, transform .2s ease; pointer-events: none;
+    position: absolute; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom));
+    width: max-content; max-width: calc(100% - 28px); transform: translate(-50%, 6px);
+    margin: 0; padding: 10px 16px 11px; border-radius: 16px; border: 1.5px solid var(--line);
+    background: #fff;
+    font-family: var(--voice); font-weight: 700; font-size: 16px; line-height: 1.6; letter-spacing: .03em; text-wrap: balance;
+    opacity: 0; transition: opacity .18s linear, transform .18s ease; pointer-events: none;
   }
-  #say.on { opacity: 1; transform: none; }
+  #say.on { opacity: 1; transform: translate(-50%, 0); }
   #say::before {
-    content: ""; position: absolute; left: 50%; top: -9px; width: 16px; height: 16px; margin-left: -8px;
+    content: ""; position: absolute; left: 50%; top: -8px; width: 14px; height: 14px; margin-left: -7px;
     background: #fff; border-left: 1.5px solid var(--line); border-top: 1.5px solid var(--line);
     transform: rotate(45deg); border-radius: 3px 0 0 0;
   }
@@ -90,7 +116,7 @@
 
   /* 最初だけ出す断り書き */
   #note {
-    position: absolute; left: 50%; bottom: calc(112px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    position: absolute; left: 50%; bottom: calc(102px + env(safe-area-inset-bottom)); transform: translateX(-50%);
     margin: 0; padding: 8px 14px; border-radius: 999px; white-space: nowrap;
     background: rgba(255,255,255,.92); font-size: 13px; font-weight: 700; letter-spacing: .04em;
     transition: opacity .3s linear; pointer-events: none;
@@ -100,15 +126,18 @@
   /* 押す物（下） */
   #acts {
     position: absolute; left: 0; right: 0; bottom: calc(20px + env(safe-area-inset-bottom));
-    display: flex; justify-content: center; gap: 22px;
+    display: flex; justify-content: center; gap: 20px;
+    transition: opacity .2s linear, transform .2s ease;
   }
+  #frame.speaking #acts { opacity: 0; transform: translateY(10px); pointer-events: none; }
   #acts button {
-    width: 72px; height: 72px; padding: 0; border-radius: 50%; border: 1.5px solid var(--line);
+    width: 68px; height: 68px; padding: 0; border-radius: 50%; border: 1.5px solid var(--line);
     background: rgba(255,255,255,.96); box-shadow: 0 6px 16px rgba(108,133,213,.3); cursor: pointer;
     display: grid; place-content: center; justify-items: center; gap: 3px;
     transition: transform .12s ease, background-color .15s linear, color .15s linear, opacity .2s linear;
   }
   #acts button svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  #acts button .emoji { display: block; height: 26px; font-size: 24px; line-height: 26px; font-weight: 400; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
   #acts button span { font-size: 11px; font-weight: 700; letter-spacing: .04em; line-height: 1; }
   #acts button:active { transform: scale(.92); }
   #acts button[disabled] { opacity: .45; cursor: default; box-shadow: none; }
@@ -134,6 +163,7 @@
   :is(#acts button, #count, #close, #voices button):focus-visible { outline: 3px solid var(--royal); outline-offset: 3px; }
   @media (prefers-reduced-motion: reduce) {
     .ripple, .heart, #count.bump { animation-duration: .01s; }
+    .finger b { animation-duration: .5s; }
     #frame.poked video { animation: none; }
     #say, #acts button, #talk { transition: none; }
   }
@@ -141,7 +171,7 @@
 </head>
 <body>
 <main id="frame" aria-label="スマホサイズのV">
-  <video id="idle" poster="idle.jpg?v=5b412ea9" muted autoplay loop playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
+  <video id="idle" poster="idle.jpg?v=f7afc54c" muted autoplay loop playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
   <video id="talk" playsinline webkit-playsinline disablepictureinpicture preload="none" aria-hidden="true"></video>
   <div id="fx" aria-hidden="true"></div>
 
@@ -154,7 +184,7 @@
   <div id="acts">
     <button type="button" data-act="greet" disabled><svg viewBox="0 0 24 24" aria-hidden="true"></svg><span>あいさつ</span></button>
     <button type="button" data-act="call" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.6A2.6 2.6 0 0 1 6.6 4h10.8A2.6 2.6 0 0 1 20 6.6v6.8a2.6 2.6 0 0 1-2.6 2.600H11.200L7 19.600V16H6.600A2.6 2.6 0 0 1 4 13.400z"/></svg><span>呼ぶ</span></button>
-    <button type="button" data-act="poke" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="6.6"/><path d="M12 1.800v2M12 20.200v2M1.800 12h2M20.200 12h2"/></svg><span>つつく</span></button>
+    <button type="button" data-act="poke" disabled><b class="emoji" aria-hidden="true">👈</b><span>つつく</span></button>
   </div>
 
   <div id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
@@ -176,17 +206,17 @@ const LOOP = 8;          // 待機の動画の1周（秒）
 //   call … 「呼ぶ」　poke … 「つつく」（体を直接押した時も）
 //   closer … 今聞けるボイスを全部聞いた後に出る締め
 const CLIPS = [
-  {"name":"ohayou","src":"talk-ohayou.mp4?v=892efd30","dur":5.3667,"role":"greet-morning","text":"おはよう。今日も頑張ってね。いってらっしゃい。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.25,0.29,0.33,0.37,0.39,0.39,0.43,0.46,0.5,0.53,0.53,0.56,0.58,0.62,0.66,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.7,0.7,0.73,0.76,0.8,0.84,0.88,0.92,0.96,0.99,1,1,1,1,1]},
-  {"name":"okaeri","src":"talk-okaeri.mp4?v=0f1c9901","dur":4.6333,"role":"greet-day","text":"おかえり。君のこと、ずっと待ってたよ。","prog":[0,0.03,0.04,0.08,0.13,0.17,0.21,0.25,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.29,0.33,0.37,0.42,0.44,0.45,0.49,0.53,0.57,0.59,0.59,0.59,0.59,0.6,0.64,0.64,0.68,0.72,0.76,0.76,0.8,0.82,0.86,0.9,0.94,0.99,1,1,1,1,1,1]},
-  {"name":"oyasumi","src":"talk-oyasumi.mp4?v=bba4497a","dur":4.8,"role":"greet-night","text":"おやすみなさい。夢の中でも一緒だよ。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.24,0.28,0.32,0.35,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.4,0.44,0.47,0.51,0.55,0.57,0.59,0.62,0.66,0.7,0.73,0.76,0.76,0.76,0.76,0.76,0.79,0.82,0.85,0.88,0.92,0.96,0.99,1,1,1,1,1,1]},
-  {"name":"moshimoshi","src":"talk-moshimoshi.mp4?v=e16524e6","dur":3.6,"role":"call","text":"もしもーし。聴こえてますかぁ？","prog":[0.01,0.05,0.09,0.14,0.18,0.22,0.26,0.3,0.34,0.38,0.42,0.43,0.43,0.43,0.43,0.45,0.47,0.48,0.51,0.55,0.59,0.64,0.68,0.72,0.75,0.78,0.82,0.86,0.9,0.94,0.97,1,1,1,1,1,1]},
-  {"name":"fue","src":"talk-fue.mp4?v=54008b24","dur":7.1333,"role":"call","text":"ふぇ！？びっくりした……ちゃんと、聴こえてる………かな？","prog":[0.02,0.05,0.08,0.11,0.14,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.2,0.22,0.22,0.24,0.27,0.3,0.3,0.33,0.36,0.39,0.42,0.45,0.47,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.53,0.56,0.57,0.6,0.62,0.62,0.62,0.62,0.62,0.65,0.68,0.71,0.72,0.75,0.78,0.81,0.82,0.82,0.82,0.82,0.82,0.83,0.86,0.89,0.92,0.95,0.97,0.98,1,1,1,1,1,1]},
-  {"name":"kyuu","src":"talk-kyuu.mp4?v=074b0364","dur":10.7667,"role":"poke","text":"きゅ、急に来られたらビックリするじゃない！で、でも、来てくれてありがとう。……嬉しいよ。","prog":[0,0.01,0.03,0.03,0.03,0.03,0.05,0.07,0.09,0.11,0.12,0.13,0.15,0.17,0.19,0.2,0.22,0.24,0.25,0.25,0.25,0.27,0.28,0.29,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.49,0.49,0.49,0.49,0.49,0.49,0.51,0.53,0.55,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.58,0.59,0.6,0.62,0.64,0.66,0.68,0.68,0.68,0.68,0.68,0.68,0.69,0.71,0.73,0.75,0.76,0.77,0.79,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.84,0.86,0.88,0.9,0.92,0.93,0.94,0.96,0.98,1,1,1,1,1,1]},
-  {"name":"sonnani","src":"talk-sonnani.mp4?v=f4a910a8","dur":9.8333,"role":"poke","text":"そんなに押して……暇なの？……じゃあ、もう少し一緒にいてあげる。","prog":[0,0,0,0,0.01,0.02,0.04,0.07,0.09,0.12,0.14,0.17,0.17,0.19,0.21,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.24,0.26,0.28,0.31,0.33,0.35,0.38,0.4,0.43,0.44,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.46,0.48,0.5,0.52,0.54,0.54,0.54,0.54,0.55,0.57,0.6,0.62,0.65,0.67,0.69,0.71,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.75,0.77,0.8,0.82,0.85,0.86,0.88,0.91,0.93,0.96,0.98,1,1,1,1,1,1]},
-  {"name":"tsutsukanaide","src":"talk-tsutsukanaide.mp4?v=719a5da9","dur":8.1667,"role":"poke","text":"ちょ、ちょっと！つつかないで！……待って。もう一回。","prog":[0,0.02,0.04,0.04,0.04,0.04,0.04,0.08,0.08,0.08,0.1,0.14,0.17,0.18,0.18,0.18,0.18,0.18,0.18,0.2,0.22,0.24,0.27,0.3,0.34,0.36,0.39,0.43,0.46,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.5,0.54,0.55,0.56,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.6,0.64,0.65,0.66,0.69,0.73,0.76,0.77,0.78,0.78,0.78,0.78,0.78,0.79,0.82,0.86,0.89,0.9,0.9,0.93,0.97,0.99,1,1,1,1,1,1]},
-  {"name":"ijou","src":"talk-ijou.mp4?v=8ddaea8c","dur":2.5,"role":"closer","text":"以上っ！テストでした！","prog":[0,0.07,0.14,0.19,0.29,0.4,0.4,0.4,0.4,0.4,0.47,0.57,0.59,0.6,0.67,0.72,0.78,0.78,0.78,0.84,0.95,1,1,1,1,1]}
+  {"name":"ohayou","src":"talk-ohayou.mp4?v=6a865445","dur":5.3667,"role":"greet-morning","text":"おはよう。今日も頑張ってね。いってらっしゃい。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.25,0.29,0.33,0.37,0.39,0.39,0.43,0.46,0.5,0.53,0.53,0.56,0.58,0.62,0.66,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.67,0.7,0.7,0.73,0.76,0.8,0.84,0.88,0.92,0.96,0.99,1,1,1,1,1]},
+  {"name":"okaeri","src":"talk-okaeri.mp4?v=fdc2142f","dur":4.6333,"role":"greet-day","text":"おかえり。君のこと、ずっと待ってたよ。","prog":[0,0.03,0.04,0.08,0.13,0.17,0.21,0.25,0.26,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.29,0.33,0.37,0.42,0.44,0.45,0.49,0.53,0.57,0.59,0.59,0.59,0.59,0.6,0.64,0.64,0.68,0.72,0.76,0.76,0.8,0.82,0.86,0.9,0.94,0.99,1,1,1,1,1,1]},
+  {"name":"oyasumi","src":"talk-oyasumi.mp4?v=a0917a54","dur":4.8,"role":"greet-night","text":"おやすみなさい。夢の中でも一緒だよ。","prog":[0,0.02,0.06,0.1,0.13,0.17,0.21,0.24,0.28,0.32,0.35,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.37,0.4,0.44,0.47,0.51,0.55,0.57,0.59,0.62,0.66,0.7,0.73,0.76,0.76,0.76,0.76,0.76,0.79,0.82,0.85,0.88,0.92,0.96,0.99,1,1,1,1,1,1]},
+  {"name":"moshimoshi","src":"talk-moshimoshi.mp4?v=d2034977","dur":3.6,"role":"call","text":"もしもーし。聴こえてますかぁ？","prog":[0.01,0.05,0.09,0.14,0.18,0.22,0.26,0.3,0.34,0.38,0.42,0.43,0.43,0.43,0.43,0.45,0.47,0.48,0.51,0.55,0.59,0.64,0.68,0.72,0.75,0.78,0.82,0.86,0.9,0.94,0.97,1,1,1,1,1,1]},
+  {"name":"fue","src":"talk-fue.mp4?v=53935004","dur":7.1333,"role":"call","text":"ふぇ！？びっくりした……ちゃんと、聴こえてる………かな？","prog":[0.02,0.05,0.08,0.11,0.14,0.16,0.16,0.16,0.16,0.16,0.16,0.16,0.19,0.19,0.19,0.19,0.19,0.19,0.19,0.2,0.22,0.22,0.24,0.27,0.3,0.3,0.33,0.36,0.39,0.42,0.45,0.47,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.53,0.56,0.57,0.6,0.62,0.62,0.62,0.62,0.62,0.65,0.68,0.71,0.72,0.75,0.78,0.81,0.82,0.82,0.82,0.82,0.82,0.83,0.86,0.89,0.92,0.95,0.97,0.98,1,1,1,1,1,1]},
+  {"name":"kyuu","src":"talk-kyuu.mp4?v=5e3f4722","dur":10.7667,"role":"poke","text":"きゅ、急に来られたらビックリするじゃない！で、でも、来てくれてありがとう。……嬉しいよ。","prog":[0,0.01,0.03,0.03,0.03,0.03,0.05,0.07,0.09,0.11,0.12,0.13,0.15,0.17,0.19,0.2,0.22,0.24,0.25,0.25,0.25,0.27,0.28,0.29,0.31,0.33,0.35,0.37,0.39,0.41,0.43,0.45,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.49,0.49,0.49,0.49,0.49,0.49,0.51,0.53,0.55,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.57,0.58,0.59,0.6,0.62,0.64,0.66,0.68,0.68,0.68,0.68,0.68,0.68,0.69,0.71,0.73,0.75,0.76,0.77,0.79,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.81,0.84,0.86,0.88,0.9,0.92,0.93,0.94,0.96,0.98,1,1,1,1,1,1]},
+  {"name":"sonnani","src":"talk-sonnani.mp4?v=9f30d076","dur":9.8333,"role":"poke","text":"そんなに押して……暇なの？……じゃあ、もう少し一緒にいてあげる。","prog":[0,0,0,0,0.01,0.02,0.04,0.07,0.09,0.12,0.14,0.17,0.17,0.19,0.21,0.22,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.23,0.24,0.26,0.28,0.31,0.33,0.35,0.38,0.4,0.43,0.44,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.46,0.48,0.5,0.52,0.54,0.54,0.54,0.54,0.55,0.57,0.6,0.62,0.65,0.67,0.69,0.71,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.73,0.75,0.77,0.8,0.82,0.85,0.86,0.88,0.91,0.93,0.96,0.98,1,1,1,1,1,1]},
+  {"name":"tsutsukanaide","src":"talk-tsutsukanaide.mp4?v=5b84bbd1","dur":8.1667,"role":"poke","text":"ちょ、ちょっと！つつかないで！……待って。もう一回。","prog":[0,0.02,0.04,0.04,0.04,0.04,0.04,0.08,0.08,0.08,0.1,0.14,0.17,0.18,0.18,0.18,0.18,0.18,0.18,0.2,0.22,0.24,0.27,0.3,0.34,0.36,0.39,0.43,0.46,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.47,0.5,0.54,0.55,0.56,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.59,0.6,0.64,0.65,0.66,0.69,0.73,0.76,0.77,0.78,0.78,0.78,0.78,0.78,0.79,0.82,0.86,0.89,0.9,0.9,0.93,0.97,0.99,1,1,1,1,1,1]},
+  {"name":"ijou","src":"talk-ijou.mp4?v=521b5bcb","dur":2.5,"role":"closer","text":"以上っ！テストでした！","prog":[0,0.07,0.14,0.19,0.29,0.4,0.4,0.4,0.4,0.4,0.47,0.57,0.59,0.6,0.67,0.72,0.78,0.78,0.78,0.84,0.95,1,1,1,1,1]}
 ];
-const IDLE = 'idle.mp4?v=3f99dcf6';   // 待機の動画
+const IDLE = 'idle.mp4?v=da9da9a5';   // 待機の動画
 
 const $ = (id) => document.getElementById(id);
 const frame = $('frame'), idle = $('idle'), talk = $('talk'), fx = $('fx'), say = $('say'), sheet = $('sheet');
@@ -262,14 +292,14 @@ function refresh() {
     b.disabled = busy || !ready[act];
     b.classList.toggle('speaking', busy && speakingAct === act);
   }
+  frame.classList.toggle('speaking', busy);
 }
-function act(name, x, y) {
-  ripple(x, y);
+function act(name, x, y, viaButton) {
+  if (name === 'poke' && viaButton) [x, y] = videoPoint(0.62, 0.315);   // ボタンで押した時は、頬をつつく
   if (!busy && idle.paused && idle.src) play(idle);
-  if (busy) return;
-  const c = closerDue() && got.has(closer.name) ? closer : ready[name];
+  const c = busy ? null : closerDue() && got.has(closer.name) ? closer : ready[name];
+  if (name === 'poke' && c) poke(x, y); else ripple(x, y);
   if (!c) return;
-  if (name === 'poke') { hearts(x, y); frame.classList.remove('poked'); void frame.offsetWidth; frame.classList.add('poked'); }
   speak(c, name);
   if (c !== closer) prepare(name);                      // 喋っている間に、次の台詞を受け取っておく
 }
@@ -290,7 +320,7 @@ function finish() {
   if (!document.hidden) play(idle);
   talk.classList.remove('on');
   if (whole && current && !heard.has(current.name)) { heard.add(current.name); remember(); showCount(true); }
-  lineTimer = setTimeout(() => say.classList.remove('on'), 2200);
+  say.classList.remove('on');
   refresh();
   if (closerDue() && !got.has(closer.name)) load(closer).catch(() => {});
 }
@@ -308,11 +338,20 @@ document.addEventListener('visibilitychange', () => {
   if (!busy && idle.src) play(idle);
 });
 
-// 台詞を、声の進み具合に合わせて一文字ずつ出す。
+// 台詞を、声の進み具合に合わせて一文字ずつ出す。長い台詞は、一区切りずつ出す。
+// 区切り：「。」「！」「？」の後。それでも長い時（15文字以上）は、途中の「……」の後でも区切る。
+function phrasesOf(text) {
+  const out = [];
+  for (const s of text.match(/[^。！？]*[。！？]+|[^。！？]+$/g) || [text]) {
+    if ([...s].length <= 14) out.push(s); else out.push(...(s.match(/…*[^…]+(?:…+(?=[^…])|$)/g) || [s]));
+  }
+  return out.map((p) => [...p]);
+}
 let lineTimer = 0, raf = 0;
 function showLine(c) {
   clearTimeout(lineTimer); cancelAnimationFrame(raf);
-  const chars = [...c.text], prog = c.prog || [];
+  const phrases = phrasesOf(c.text), prog = c.prog || [];
+  const total = phrases.reduce((n, p) => n + p.length, 0);
   const shown = document.createElement('span'), rest = document.createElement('span');
   rest.className = 'rest'; say.textContent = ''; say.append(shown, rest);
   $('live').textContent = c.text;
@@ -324,15 +363,20 @@ function showLine(c) {
   let last = -1;
   const tick = () => {
     const speaking = busy && current === c;
-    const n = speaking ? Math.round(chars.length * at(talk.currentTime || 0)) : chars.length;
-    if (n !== last) { last = n; shown.textContent = chars.slice(0, n).join(''); rest.textContent = chars.slice(n).join(''); }
-    if (n > 0) say.classList.add('on');                 // 最初の一文字が出る時に、吹き出しを出す
+    const n = speaking ? Math.round(total * at(talk.currentTime || 0)) : total;
+    if (n !== last && n > 0) {
+      last = n;
+      let start = 0, k = 0;
+      while (k < phrases.length - 1 && start + phrases[k].length < n) { start += phrases[k].length; k += 1; }   // 今出ている文字が入っている区切り
+      shown.textContent = phrases[k].slice(0, n - start).join(''); rest.textContent = phrases[k].slice(n - start).join('');
+      say.classList.add('on');
+    }
     if (speaking) raf = requestAnimationFrame(tick);
   };
   say.classList.remove('on'); tick();
 }
 
-// 押した所の手応え：波紋。つついた時はハートも。
+// 押した所の手応え：波紋。つついた時は、👈 の指が二回突いて、ハートが飛んで、体が少し弾む。
 function ripple(x, y) {
   const r = document.createElement('i'); r.className = 'ripple'; r.style.left = x + 'px'; r.style.top = y + 'px';
   fx.append(r); r.addEventListener('animationend', () => r.remove());
@@ -347,12 +391,27 @@ function hearts(x, y) {
   }
 }
 
+function videoPoint(u, v) {                             // 動画の中の位置（0〜1）を、枠の中の位置に直す
+  const fw = frame.clientWidth, fh = frame.clientHeight, k = Math.max(fw / 720, fh / 1280);   // 動画は枠いっぱいに広げて、はみ出た分を切っている
+  return [(fw - 720 * k) * 0.5 + 720 * k * u, (fh - 1280 * k) * 0.3 + 1280 * k * v];
+}
+function poke(x, y) {
+  const fromLeft = x > frame.clientWidth - 76;
+  const f = document.createElement('i'); f.className = 'finger' + (fromLeft ? ' left' : '');
+  f.style.left = x + 'px'; f.style.top = y + 'px'; f.style.setProperty('--dir', fromLeft ? -1 : 1);
+  const b = document.createElement('b'); b.textContent = fromLeft ? '👉' : '👈'; f.append(b);
+  fx.append(f); b.addEventListener('animationend', () => f.remove());
+  setTimeout(() => ripple(x, y), 140);                  // 一回目に指が当たる時
+  setTimeout(() => { ripple(x, y); hearts(x, y); }, 410);   // 二回目
+  frame.classList.remove('poked'); void frame.offsetWidth; frame.classList.add('poked');
+}
+
 frame.addEventListener('click', (e) => {
   if (e.target.closest('#sheet') || e.target.closest('#count')) return;
   const b = e.target.closest('#acts button'), box = frame.getBoundingClientRect();
   let x = e.clientX - box.left, y = e.clientY - box.top;
   if (b && e.detail === 0) { const r = b.getBoundingClientRect(); x = r.left + r.width / 2 - box.left; y = r.top + r.height / 2 - box.top; }   // キーボードで押した時は、ボタンの真ん中から
-  act(b ? b.dataset.act : 'poke', x, y);                // 体を直接押した時は「つつく」
+  act(b ? b.dataset.act : 'poke', x, y, Boolean(b));    // 体を直接押した時は「つつく」
 });
 
 /* ───────── ボイスの一覧 ───────── */
